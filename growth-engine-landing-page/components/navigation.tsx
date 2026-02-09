@@ -11,7 +11,7 @@ export function Navigation() {
   ]
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+    <nav className="fixed top-0 left-0 right-0 z-[100] border-b border-border bg-background/95 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-4 flex items-center justify-between">
         <a href="#hero" className="font-[var(--font-bebas)] text-2xl tracking-wide">
           LAUNCHALONE

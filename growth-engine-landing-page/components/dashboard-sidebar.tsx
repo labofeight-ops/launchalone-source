@@ -27,7 +27,7 @@ const navSections = [
     title: "settings",
     items: [
       { label: "Account Health", href: "/dashboard#account-health", icon: "⬢" },
-      { label: "X Access", href: "/dashboard#content-studio", icon: "⬡" },
+      { label: "X Login", href: "/dashboard#x-login", icon: "⬡" },
     ],
   },
 ]

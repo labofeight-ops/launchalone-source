@@ -36,12 +36,12 @@ export function HeroSection() {
     <section
       ref={sectionRef}
       id="hero"
-      className="relative min-h-screen flex items-center justify-center px-6 md:px-12 pt-24 md:pt-28"
+      className="relative min-h-screen flex items-center justify-center px-6 md:px-12 pt-24 md:pt-32"
     >
       <AnimatedNoise opacity={0.03} />
 
       {/* Status badge */}
-      <div className="absolute top-20 md:top-24 left-1/2 -translate-x-1/2">
+      <div className="absolute top-20 md:top-24 left-1/2 -translate-x-1/2 hidden sm:block">
         <div className="flex items-center gap-2 border border-border px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
@@ -54,9 +54,9 @@ export function HeroSection() {
       {/* Main content */}
       <div ref={contentRef} className="flex-1 w-full max-w-5xl text-center">
         <h1 className="font-[var(--font-bebas)] text-[clamp(3rem,8vw,7rem)] leading-[0.9] tracking-tight">
-          X GROWTH, DONE RIGHT
+          OWN X
           <br />
-          FAST. HUMAN. SIMPLE.
+          WITHOUT THE NOISE
         </h1>
 
         <p className="mt-8 max-w-2xl mx-auto font-mono text-sm text-muted-foreground leading-relaxed">

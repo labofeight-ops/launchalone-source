@@ -60,6 +60,15 @@ export function HowItWorksSection() {
           ))}
         </div>
 
+        <div className="mt-10 flex items-center justify-center">
+          <a
+            href="/dashboard#x-login"
+            className="inline-flex items-center gap-3 border border-accent bg-accent px-8 py-3 font-mono text-xs uppercase tracking-widest text-accent-foreground hover:bg-accent/90 transition-all duration-200"
+          >
+            Connect X
+          </a>
+        </div>
+
         {/* Time-to-value callout */}
         <div className="mt-16 text-center">
           <div className="inline-flex items-center gap-6 border border-accent px-8 py-4">

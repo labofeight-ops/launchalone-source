@@ -299,6 +299,8 @@ export default function DashboardPage() {
   )
   const [signalScore, setSignalScore] = useState(87)
   const [statusNote, setStatusNote] = useState("")
+  const [xConnected, setXConnected] = useState(false)
+  const [xHandle, setXHandle] = useState("@launchalone")
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>(defaultScheduledPosts)
   const [scheduleIndex, setScheduleIndex] = useState(0)
   const [replyOps, setReplyOps] = useState<ReplyOpportunity[]>(defaultReplyOps)
@@ -365,6 +367,27 @@ export default function DashboardPage() {
     setStatusNote("Post sent. Watch the first 45 minutes.")
   }
 
+  function handleXConnect() {
+    if (!xHandle.trim().startsWith("@")) {
+      setXHandle((prev) => (prev.startsWith("@") ? prev : `@${prev}`))
+    }
+    setXConnected(true)
+    setActivity((prev) => [
+      { title: "X connected", time: "Just now", stats: xHandle.trim() || "@launchalone" },
+      ...prev,
+    ])
+    setStatusNote("X connected. You can post and schedule.")
+  }
+
+  function handleXDisconnect() {
+    setXConnected(false)
+    setActivity((prev) => [
+      { title: "X disconnected", time: "Just now", stats: xHandle.trim() || "@launchalone" },
+      ...prev,
+    ])
+    setStatusNote("X disconnected.")
+  }
+
   function handlePostReply(id: number) {
     const current = replyOps.find((item) => item.id === id)
     setReplyOps((prev) => prev.filter((item) => item.id !== id))
@@ -415,6 +438,73 @@ export default function DashboardPage() {
           {/* Quick Stats */}
           <div id="metrics">
             <DashboardStats stats={data.stats} />
+          </div>
+
+          {/* X Login */}
+          <div id="x-login" className="border border-border bg-card p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+              <div>
+                <h2 className="font-[var(--font-bebas)] text-2xl">CONNECT X</h2>
+                <p className="font-mono text-xs text-muted-foreground">
+                  Connect once to enable posting, scheduling, and replies.
+                </p>
+              </div>
+              <span className={`font-mono text-[10px] uppercase tracking-widest ${
+                xConnected ? "text-accent" : "text-muted-foreground"
+              }`}>
+                {xConnected ? "CONNECTED" : "REQUIRED"}
+              </span>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block font-mono text-xs uppercase tracking-widest text-muted-foreground mb-2">
+                    X Handle
+                  </label>
+                  <input
+                    type="text"
+                    value={xHandle}
+                    onChange={(event) => setXHandle(event.target.value)}
+                    placeholder="@yourhandle"
+                    className="w-full bg-background border border-border px-4 py-2 font-mono text-sm focus:border-accent focus:outline-none"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleXConnect}
+                    className="flex-1 border border-accent bg-accent px-4 py-2 font-mono text-xs uppercase tracking-widest text-accent-foreground hover:bg-accent/90 transition-colors"
+                  >
+                    Sign In With X
+                  </button>
+                  <button
+                    onClick={handleXDisconnect}
+                    className="flex-1 border border-border px-4 py-2 font-mono text-xs uppercase tracking-widest text-foreground hover:border-accent hover:text-accent transition-colors"
+                  >
+                    Disconnect
+                  </button>
+                </div>
+              </div>
+
+              <div className="border border-border p-4 space-y-3 font-mono text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Status</span>
+                  <span className="text-accent">{xConnected ? "Connected" : "Not Connected"}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Posting</span>
+                  <span className="text-accent">{xConnected ? "Enabled" : "Locked"}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Sync</span>
+                  <span className="text-accent">Last checked 2 min ago</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Safety</span>
+                  <span className="text-accent">Guardrails Active</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Analytics Controls */}

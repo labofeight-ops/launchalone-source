@@ -36,7 +36,7 @@ export function DashboardSidebar() {
   const [activeItem, setActiveItem] = useState("Dashboard")
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-60 border-r border-border bg-background z-50 overflow-y-auto">
+    <aside className="fixed left-0 top-0 hidden h-screen w-60 border-r border-border bg-background z-50 md:flex md:flex-col">
       <div className="p-6 border-b border-border">
         <Link href="/" className="font-[var(--font-bebas)] text-2xl tracking-wide hover:text-accent transition-colors">
           LAUNCHALONE
@@ -46,7 +46,7 @@ export function DashboardSidebar() {
         </div>
       </div>
 
-      <nav className="px-3 py-6 space-y-6">
+      <nav className="flex-1 px-3 py-6 space-y-6 overflow-y-auto">
         {navSections.map((section) => (
           <div key={section.title}>
             <div className="px-3 mb-2">
@@ -78,7 +78,7 @@ export function DashboardSidebar() {
       </nav>
 
       {/* Growth Status */}
-      <div className="absolute bottom-0 left-0 right-0 border-t border-border p-4 bg-card">
+      <div className="border-t border-border p-4 bg-card">
         <div className="text-center">
           <div className="font-[var(--font-bebas)] text-3xl text-accent">3,247</div>
           <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">

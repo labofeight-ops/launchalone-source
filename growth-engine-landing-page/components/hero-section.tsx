@@ -33,11 +33,15 @@ export function HeroSection() {
   }, [])
 
   return (
-    <section ref={sectionRef} id="hero" className="relative min-h-screen flex items-center justify-center px-6 md:px-12">
+    <section
+      ref={sectionRef}
+      id="hero"
+      className="relative min-h-screen flex items-center justify-center px-6 md:px-12 pt-24 md:pt-28"
+    >
       <AnimatedNoise opacity={0.03} />
 
       {/* Status badge */}
-      <div className="absolute top-24 left-1/2 -translate-x-1/2">
+      <div className="absolute top-20 md:top-24 left-1/2 -translate-x-1/2">
         <div className="flex items-center gap-2 border border-border px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
@@ -50,9 +54,9 @@ export function HeroSection() {
       {/* Main content */}
       <div ref={contentRef} className="flex-1 w-full max-w-5xl text-center">
         <h1 className="font-[var(--font-bebas)] text-[clamp(3rem,8vw,7rem)] leading-[0.9] tracking-tight">
-          <span className="text-accent">ULTRA SPECIALIST</span> FOR X GROWTH
+          X GROWTH, DONE RIGHT
           <br />
-          PERSONAL + BUSINESS BRANDS
+          FAST. HUMAN. SIMPLE.
         </h1>
 
         <p className="mt-8 max-w-2xl mx-auto font-mono text-sm text-muted-foreground leading-relaxed">
@@ -106,9 +110,9 @@ export function HeroSection() {
       </div>
 
       {/* Floating info tag */}
-      <div className="absolute bottom-8 right-8 md:bottom-12 md:right-12">
+      <div className="absolute bottom-8 right-8 md:bottom-12 md:right-12 hidden md:block">
         <div className="border border-border px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          LAUNCHALONE / ULTRA GROWTH OS
+          LAUNCHALONE / X GROWTH OS
         </div>
       </div>
     </section>

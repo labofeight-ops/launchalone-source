@@ -390,8 +390,18 @@ export default function DashboardPage() {
     <div className="flex min-h-screen bg-background">
       <DashboardSidebar />
 
-      <main className="flex-1 ml-60">
-        <div className="p-8 space-y-8 pb-24">
+      <main className="flex-1 ml-0 md:ml-60 min-w-0">
+        <div className="md:hidden sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur px-4 py-3 flex items-center justify-between">
+          <div className="font-[var(--font-bebas)] text-2xl tracking-wide">LAUNCHALONE</div>
+          <a
+            href="#content-studio"
+            className="border border-accent px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-accent"
+          >
+            Jump In
+          </a>
+        </div>
+
+        <div className="p-6 md:p-8 space-y-8 pb-24">
           {/* Header */}
           <div id="overview">
             <h1 className="font-[var(--font-bebas)] text-4xl tracking-tight mb-2">

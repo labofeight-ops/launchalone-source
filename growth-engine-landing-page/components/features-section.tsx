@@ -50,8 +50,8 @@ export function FeaturesSection() {
             $500K+ SECRET SAUCE
           </div>
           <h2 className="font-[var(--font-bebas)] text-[clamp(2.5rem,5vw,4rem)] leading-none tracking-tight">
-            ULTRA-SPECIALIST SYSTEMS<br/>
-            FOR DOMINATING X IN 2026
+            SYSTEMS FOR<br/>
+            DOMINATING X IN 2026
           </h2>
           <p className="mt-4 font-mono text-sm text-muted-foreground max-w-2xl">
             Six proprietary systems working together. No AI detection. No tech skills needed. Setup under 5 minutes.

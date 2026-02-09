@@ -18,13 +18,13 @@ const ibmPlexMono = IBM_Plex_Mono({
 const bebasNeue = Bebas_Neue({ weight: "400", subsets: ["latin"], variable: "--font-bebas" })
 
 export const metadata: Metadata = {
-  title: "Launchalone | Ultra Specialist for X Growth",
+  title: "Launchalone | X Growth, Done Right",
   description:
-    "Launchalone is the ultra specialist for X growth for personal and business brands. Built on 2026 ranking signals. Set up in under 5 minutes.",
+    "Launchalone is built for X growth for personal and business brands. Built on 2026 ranking signals. Set up in under 5 minutes.",
   openGraph: {
-    title: "Launchalone | Ultra Specialist for X Growth",
+    title: "Launchalone | X Growth, Done Right",
     description:
-      "Launchalone is the ultra specialist for X growth for personal and business brands. Built on 2026 ranking signals. Set up in under 5 minutes.",
+      "Launchalone is built for X growth for personal and business brands. Built on 2026 ranking signals. Set up in under 5 minutes.",
     type: "website",
   },
 }

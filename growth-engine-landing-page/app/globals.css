@@ -136,3 +136,7 @@
   background: oklch(0.7 0.2 45);
   color: oklch(0.08 0 0);
 }
+
+section[id] {
+  scroll-margin-top: 110px;
+}

@@ -7,18 +7,29 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Warn early if XAI key missing (content generation will fail)
+if (!process.env.XAI_API_KEY) {
+  console.warn('Warning: XAI_API_KEY is not set. Content generation endpoints will fail.');
+}
+
 // Use service role key so the backend can bypass Supabase RLS policies.
 // Falls back to public anon key for local demos, but writes will fail if RLS is on.
-const supabase = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY || '',
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error(
+    'Missing Supabase configuration. Set SUPABASE_URL and SUPABASE_SERVICE_KEY (or SUPABASE_KEY).'
+  );
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
   }
-);
+});
 
 // ============================================================================
 // 🔥 ULTRA SECRET SAUCE #1: NEURAL HUMANIZATION ENGINE

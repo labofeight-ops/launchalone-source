@@ -11,7 +11,7 @@ const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
 
 // Import backend app
-const backendApp = require('./backend-server-ultra');
+const backendApp = require('./backend-core');
 
 nextApp.prepare().then(() => {
   const server = express();

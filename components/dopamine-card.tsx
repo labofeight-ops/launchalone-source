@@ -1,196 +1,229 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Heart, MessageCircle, Repeat, UserPlus, Bell, Send, Edit3, ArrowUpRight } from "lucide-react"
+import { Heart, MessageCircle, Repeat, UserPlus, Zap, TrendingUp, BarChart3, Search } from "lucide-react"
 
 export function DopamineCard() {
-    const [followerCount, setFollowerCount] = useState(892)
-    const [notifications, setNotifications] = useState<any[]>([])
+    const [followerCount, setFollowerCount] = useState(1240)
+    const [growth, setGrowth] = useState(0)
 
-    // Follower count ticker
+    // High-speed ticker
     useEffect(() => {
         const interval = setInterval(() => {
-            setFollowerCount(prev => prev + Math.floor(Math.random() * 3))
-        }, 2500)
-        return () => clearInterval(interval)
-    }, [])
-
-    // Auto-generate notifications
-    useEffect(() => {
-        const types = [
-            { type: "like", icon: Heart, color: "text-pink-500", text: "liked your post" },
-            { type: "repost", icon: Repeat, color: "text-green-500", text: "reposted" },
-            { type: "follow", icon: UserPlus, color: "text-blue-400", text: "followed you" },
-            { type: "reply", icon: MessageCircle, color: "text-blue-500", text: "replied: 'Agreed!'" },
-        ]
-        const users = ["@alexhormozi", "@sahilbloom", "@naval", "@paulg", "@elonmusk", "@dickiebush", "@shl"]
-
-        const interval = setInterval(() => {
-            const randomType = types[Math.floor(Math.random() * types.length)]
-            const randomUser = users[Math.floor(Math.random() * users.length)]
-
-            const newNotif = {
-                id: Date.now(),
-                user: randomUser,
-                ...randomType
-            }
-
-            setNotifications(prev => [newNotif, ...prev].slice(0, 5))
-        }, 1800)
+            const increment = Math.floor(Math.random() * 5) + 1
+            setFollowerCount(prev => prev + increment)
+            setGrowth(prev => prev + increment)
+        }, 150) // Hyper fast updates
         return () => clearInterval(interval)
     }, [])
 
     return (
-        <section className="py-24 bg-black overflow-hidden flex justify-center items-center px-6">
-            <div className="max-w-4xl w-full">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-black text-white mb-6">
-                        Experience the <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">Growth Loop.</span>
+        <section className="py-24 bg-black overflow-hidden flex justify-center items-center px-4 relative">
+            {/* Ambient Glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
+
+            <div className="max-w-5xl w-full relative z-10">
+                <div className="text-center mb-12">
+                    <h2 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tighter">
+                        THE <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff88] via-white to-blue-500 animate-gradient-x">GROWTH LOOP</span>
                     </h2>
-                    <p className="text-white/50 text-xl">Where consistency meets dopamine.</p>
+                    <p className="text-white/60 text-xl font-medium">Systematic. Automated. Inevitable.</p>
                 </div>
 
-                {/* THE CARD */}
-                <div className="relative w-full aspect-[4/3] md:aspect-[16/9] bg-[#050505] rounded-3xl border border-white/10 shadow-2xl overflow-hidden flex flex-col md:flex-row">
+                {/* HYPER CARD */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 bg-[#0a0a0a] border border-white/10 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden ring-1 ring-white/10">
 
-                    {/* Background Grid */}
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
-
-                    {/* Left Column: Post Composer (The "Work") */}
-                    <div className="flex-1 p-8 border-r border-white/10 flex flex-col justify-between relative z-10 bg-black/50 backdrop-blur-sm">
-                        <div>
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-full bg-white/10 p-1">
-                                    <div className="w-full h-full rounded-full bg-gradient-to-tr from-white to-gray-400" />
+                    {/* 1. LEFT: THE ENGINE (Analysis & Actions) - 5 Cols */}
+                    <div className="md:col-span-5 space-y-4 flex flex-col">
+                        {/* Active Scanner Visual */}
+                        <div className="bg-black/40 border border-white/10 rounded-2xl p-4 flex-1 flex flex-col relative overflow-hidden">
+                            <div className="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
+                                <div className="flex items-center gap-2 text-blue-400 font-bold text-xs uppercase tracking-widest">
+                                    <Zap className="w-4 h-4 animate-pulse" /> AI Engine Active
                                 </div>
-                                <div>
-                                    <div className="font-bold text-white">You</div>
-                                    <div className="text-xs text-emerald-400 flex items-center gap-1">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                                        Online
-                                    </div>
-                                </div>
+                                <div className="text-xs font-mono text-white/40">LATENCY: 12ms</div>
                             </div>
 
-                            <div className="space-y-4">
-                                <div className="h-4 bg-white/10 rounded w-3/4 animate-pulse" />
-                                <div className="h-4 bg-white/10 rounded w-full animate-pulse delay-75" />
-                                <div className="h-4 bg-white/10 rounded w-1/2 animate-pulse delay-150" />
-                            </div>
+                            <ScanningSequence />
                         </div>
 
-                        {/* Animated Typing Simulation */}
-                        <div className="bg-[#111] border border-white/10 rounded-xl p-4 mt-8">
-                            <div className="text-xs uppercase text-white/30 mb-2 flex justify-between">
-                                <span>Drafting Topic: SaaS Growth</span>
-                                <Edit3 className="w-3 h-3" />
+                        {/* Virality Prediction Graph */}
+                        <div className="h-32 bg-black/40 border border-white/10 rounded-2xl p-4 relative overflow-hidden flex items-end justify-between gap-1">
+                            <div className="absolute top-3 left-3 text-xs font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-2">
+                                <TrendingUp className="w-3 h-3" /> Virality Score
                             </div>
-                            <TypewriterText text="The secret to scaling to $10k MRR isn't more features. It's doing the boring work everyday." />
-                            <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/5">
-                                <div className="flex gap-2 text-blue-400">
-                                    <div className="w-4 h-4 rounded-full border border-blue-400/30" />
-                                    <div className="w-4 h-4 rounded-full border border-blue-400/30" />
-                                </div>
-                                <button className="bg-white text-black text-xs font-bold px-4 py-2 rounded-full flex items-center gap-2">
-                                    Post <Send className="w-3 h-3" />
-                                </button>
-                            </div>
+                            {Array.from({ length: 20 }).map((_, i) => (
+                                <LiveBar key={i} index={i} />
+                            ))}
                         </div>
                     </div>
 
-                    {/* Right Column: The "Reward" (Notifications & Stats) */}
-                    <div className="flex-1 p-8 relative z-10 flex flex-col bg-black/50 backdrop-blur-sm">
-
-                        {/* Stats Header */}
-                        <div className="flex justify-between items-center mb-8">
-                            <div className="text-sm font-medium text-white/50">Total Followers</div>
-                            <div className="text-3xl font-black text-white tabular-nums tracking-tight">
-                                {followerCount.toLocaleString()}
-                                <span className="text-emerald-400 text-sm font-bold ml-2 align-top">+12 today</span>
+                    {/* 2. RIGHT: THE REWARD (Live Feed & Stats) - 7 Cols */}
+                    <div className="md:col-span-7 flex flex-col gap-4">
+                        {/* Big Stats Row */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col justify-between overflow-hidden relative group">
+                                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="text-white/40 text-xs font-bold uppercase tracking-widest mb-1">Total Followers</div>
+                                <div className="text-4xl lg:text-5xl font-black text-white slash-zero tracking-tighter">
+                                    <CountUp value={followerCount} />
+                                </div>
+                            </div>
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col justify-between overflow-hidden relative group">
+                                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="text-white/40 text-xs font-bold uppercase tracking-widest mb-1">Session Growth</div>
+                                <div className="text-4xl lg:text-5xl font-black text-emerald-400 slash-zero tracking-tighter flex items-center gap-2">
+                                    +{growth}
+                                    <ArrowUp className="w-6 h-6 animate-bounce" />
+                                </div>
                             </div>
                         </div>
 
-                        {/* Live Feed */}
-                        <div className="flex-1 overflow-hidden relative">
-                            <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-black/50 to-transparent z-10" />
-                            <div className="text-xs font-bold text-white/30 uppercase mb-4 tracking-widest">Live Activity</div>
+                        {/* Hyperspeed Notification Feed */}
+                        <div className="flex-1 bg-black/40 border border-white/10 rounded-2xl p-4 relative overflow-hidden min-h-[300px]">
+                            <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-[#0a0a0a] to-transparent z-10 pointer-events-none" />
+                            <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0a0a0a] to-transparent z-10 pointer-events-none" />
 
-                            <div className="space-y-3">
-                                <AnimatePresence initial={false}>
-                                    {notifications.map((notif) => (
-                                        <motion.div
-                                            key={notif.id}
-                                            initial={{ opacity: 0, x: 20, height: 0 }}
-                                            animate={{ opacity: 1, x: 0, height: "auto" }}
-                                            exit={{ opacity: 0, x: -20, height: 0 }}
-                                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                            className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5"
-                                        >
-                                            <div className="p-2 rounded-full bg-white/5 border border-white/5">
-                                                <notif.icon className={`w-4 h-4 ${notif.color}`} fill={notif.type === 'like' ? 'currentColor' : 'none'} />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm text-white truncate">
-                                                    <span className="font-bold">{notif.user}</span> <span className="text-white/60">{notif.text}</span>
-                                                </p>
-                                            </div>
-                                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                                        </motion.div>
-                                    ))}
-                                </AnimatePresence>
+                            <div className="flex items-center justify-between mb-4 px-2">
+                                <span className="text-xs font-bold text-white/30 uppercase tracking-widest">Live Activity Feed</span>
+                                <span className="flex h-2 w-2 relative">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
                             </div>
 
-                            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black to-transparent z-10" />
+                            <NotificationFeed />
                         </div>
-
-                        {/* DM Toast */}
-                        <motion.div
-                            initial={{ y: 50, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 2, duration: 0.5 }}
-                            className="mt-4 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center gap-4"
-                        >
-                            <div className="relative">
-                                <div className="w-10 h-10 rounded-full bg-white/10" />
-                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-black text-[10px] flex items-center justify-center text-white font-bold">1</div>
-                            </div>
-                            <div>
-                                <div className="text-xs text-blue-300 font-bold mb-0.5">New DM Request</div>
-                                <div className="text-sm text-white">Hey! Loved your post about...</div>
-                            </div>
-                        </motion.div>
                     </div>
 
-                    {/* Decor Elements */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-500/20 rounded-full blur-[100px] pointer-events-none mix-blend-screen animate-pulse" />
                 </div>
             </div>
         </section>
     )
 }
 
-// Simple Typing Effect Component
-function TypewriterText({ text }: { text: string }) {
-    const [displayedText, setDisplayedText] = useState("")
+function ArrowUp({ className }: { className?: string }) {
+    return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={className}><path d="M12 19V5M5 12l7-7 7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+}
+
+// ---- SUB-COMPONENTS FOR ANIMATION LOGIC ----
+
+function CountUp({ value }: { value: number }) {
+    return (
+        <span className="tabular-nums">
+            {value.toLocaleString()}
+        </span>
+    )
+}
+
+function LiveBar({ index }: { index: number }) {
+    // Random height jitter
+    const [height, setHeight] = useState(20)
 
     useEffect(() => {
-        let i = 0
         const interval = setInterval(() => {
-            setDisplayedText(text.slice(0, i))
-            i++
-            if (i > text.length) {
-                clearInterval(interval)
-                setTimeout(() => { i = 0; setDisplayedText("") }, 3000) // Loop it
-            }
-        }, 50)
+            setHeight(Math.random() * 80 + 20)
+        }, 100 + (index * 20)) // Staggered updates
         return () => clearInterval(interval)
-    }, [text])
+    }, [index])
 
     return (
-        <p className="text-lg font-medium text-white/90 font-serif leading-relaxed">
-            {displayedText}
-            <span className="animate-blink inline-block w-0.5 h-5 bg-blue-400 ml-1 align-middle" />
-        </p>
+        <div
+            className="w-full bg-emerald-500/20 border-t border-emerald-500 rounded-t-sm transition-all duration-300 ease-out"
+            style={{ height: `${height}%` }}
+        />
+    )
+}
+
+function ScanningSequence() {
+    const [step, setStep] = useState(0)
+    const SEQUENCE = [
+        { text: "SCANNING TIMELINE...", color: "text-white/60" },
+        { text: "DETECTED VIRAL HOOK", color: "text-blue-400" },
+        { text: "ANALYZING SENTIMENT...", color: "text-white/60" },
+        { text: "GENERATING REPLY...", color: "text-purple-400" },
+        { text: "OPTIMIZING FOR ENGAGEMENT", color: "text-emerald-400" },
+        { text: "POSTING...", color: "text-white" },
+    ]
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setStep(prev => (prev + 1) % SEQUENCE.length)
+        }, 600) // Fast step transitions
+        return () => clearInterval(interval)
+    }, [])
+
+    return (
+        <div className="font-mono text-sm space-y-2 h-full flex flex-col">
+            {SEQUENCE.map((item, i) => (
+                <div
+                    key={i}
+                    className={`transition-opacity duration-200 flex items-center gap-3 ${i === step ? "opacity-100 scale-105 origin-left font-bold" :
+                            i < step ? "opacity-30 blur-[1px]" : "opacity-10 translate-y-2"
+                        } ${item.color}`}
+                >
+                    <span className="text-[10px]">{i < step ? "✓" : ">"}</span>
+                    {item.text}
+                </div>
+            ))}
+
+            {/* Visual Scanner Line */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500/50 blur-sm animate-scanner" />
+        </div>
+    )
+}
+
+function NotificationFeed() {
+    const [notifications, setNotifications] = useState<any[]>([])
+    const NOTIF_TYPES = [
+        { icon: Heart, text: "liked your post", color: "text-pink-500", bg: "bg-pink-500/10" },
+        { icon: Repeat, text: "reposted you", color: "text-emerald-500", bg: "bg-emerald-500/10" },
+        { icon: UserPlus, text: "followed you", color: "text-blue-500", bg: "bg-blue-500/10" },
+        { icon: MessageCircle, text: "replied to you", color: "text-purple-500", bg: "bg-purple-500/10" },
+    ]
+    const USERS = ["@alexhormozi", "@sahilbloom", "@naval", "@paulg", "@elonmusk", "@shl", "@dickiebush", "@jason", "@lexfridman"]
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const type = NOTIF_TYPES[Math.floor(Math.random() * NOTIF_TYPES.length)]
+            const user = USERS[Math.floor(Math.random() * USERS.length)]
+            const id = Date.now() + Math.random() // Unique ID
+
+            setNotifications(prev => [
+                { id, user, ...type },
+                ...prev.slice(0, 6) // Keep only 7 items
+            ])
+        }, 800) // New notification every 800ms
+        return () => clearInterval(interval)
+    }, [])
+
+    return (
+        <div className="space-y-2 relative">
+            <AnimatePresence mode="popLayout">
+                {notifications.map((n) => (
+                    <motion.div
+                        layout
+                        key={n.id}
+                        initial={{ opacity: 0, x: -20, scale: 0.9 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors"
+                    >
+                        <div className={`p-2 rounded-lg ${n.bg}`}>
+                            <n.icon className={`w-4 h-4 ${n.color}`} fill={n.color.includes('text-pink') ? "currentColor" : "none"} />
+                        </div>
+                        <div className="flex-1 min-w-0 flex justify-between items-center">
+                            <div className="text-sm truncate">
+                                <span className="font-bold text-white mr-1">{n.user}</span>
+                                <span className="text-white/60">{n.text}</span>
+                            </div>
+                            <span className="text-[10px] text-white/20 font-mono">now</span>
+                        </div>
+                    </motion.div>
+                ))}
+            </AnimatePresence>
+        </div>
     )
 }

@@ -9,9 +9,9 @@ export function Navigation() {
   ]
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl">
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-6 md:px-12 h-16 flex items-center justify-between">
-        <a href="#hero" className="text-xl font-bold tracking-tight">
+        <a href="#hero" className="text-xl font-bold tracking-tight text-foreground">
           LAUNCHALONE
         </a>
 
@@ -20,7 +20,7 @@ export function Navigation() {
             <a
               key={index}
               href={link.href}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm text-muted-foreground hover:text-accent transition-colors"
             >
               {link.label}
             </a>
@@ -29,9 +29,9 @@ export function Navigation() {
 
         <a
           href="#pricing"
-          className="rounded-xl bg-gradient-to-r from-accent to-orange-500 px-6 py-2 text-sm font-semibold text-white hover:shadow-lg hover:shadow-accent/25 transition-all duration-200"
+          className="rounded-lg bg-gradient-to-r from-accent to-blue-400 px-6 py-2 text-sm font-semibold text-white hover:shadow-lg hover:shadow-accent/30 transition-all duration-200"
         >
-          Start In 5 Minutes
+          Get Started
         </a>
       </div>
     </nav>

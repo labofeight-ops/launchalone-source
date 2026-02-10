@@ -1,441 +1,622 @@
 "use client"
 
-import { useState } from "react"
-import {
-  Sparkles, MessageCircle, Calendar,
-  ArrowUpRight, Zap, Hash, Users, Eye, BarChart3,
-  Search, Shield, Bell, Send, ChevronDown,
-  LayoutGrid, Flame, Inbox, Clock,
-  Filter, ThumbsUp, Repeat, Bookmark
+import { useState, useMemo, useEffect } from "react"
+import { 
+  BarChart3, Zap, TrendingUp, MessageCircle, Calendar, Sparkles, Target, 
+  LogOut, MoreHorizontal, ArrowRight, Activity, Shield, Eye, Flame,
+  Clock, Copy, Send, User, Settings
 } from "lucide-react"
 
-// --- Types ---
+// Types
 type TimeRange = "7D" | "30D" | "90D"
-type TabID = "overview" | "inspiration" | "studio" | "schedule" | "engage" | "analytics"
+type TabType = "overview" | "content" | "replies" | "schedule" | "profile"
 
-// --- Mock Data ---
-const METRICS = {
+// [Previous data structures remain the same - METRICS, REPLY_OPPORTUNITIES, SCHEDULED_POSTS]
+const METRICS: Record<TimeRange, any[]> = {
   "7D": [
-    { label: "Followers", value: "312", change: "+18%", trend: "up" },
+    { label: "Followers", value: "+312", change: "+18%", trend: "up" },
     { label: "Impressions", value: "148K", change: "+22%", trend: "up" },
     { label: "Engagement", value: "3.9%", change: "+0.8%", trend: "up" },
+    { label: "Profile Clicks", value: "1.2K", change: "+15%", trend: "up" },
   ],
   "30D": [
-    { label: "Followers", value: "1,082", change: "+34%", trend: "up" },
+    { label: "Followers", value: "+1,082", change: "+34%", trend: "up" },
     { label: "Impressions", value: "612K", change: "+41%", trend: "up" },
     { label: "Engagement", value: "3.4%", change: "+0.6%", trend: "up" },
+    { label: "Profile Clicks", value: "4.8K", change: "+24%", trend: "up" },
   ],
   "90D": [
-    { label: "Followers", value: "3,247", change: "+61%", trend: "up" },
+    { label: "Followers", value: "+3,247", change: "+61%", trend: "up" },
     { label: "Impressions", value: "1.8M", change: "+74%", trend: "up" },
     { label: "Engagement", value: "3.1%", change: "+0.4%", trend: "up" },
+    { label: "Profile Clicks", value: "12.4K", change: "+38%", trend: "up" },
   ],
-} as const
+}
 
 const REPLY_OPPORTUNITIES = [
-  { id: "1", author: "Sarah Chen", handle: "@sarahbuilds", tweet: "Finally hit 10K followers! The biggest lesson: consistency beats perfection every single time.", score: 94, time: "2h" },
-  { id: "2", author: "Mike Johnson", handle: "@mikegrows", tweet: "My engagement is stuck at 1.5%. Posting daily but seeing zero growth. What am I missing?", score: 89, time: "1h" },
+  {
+    id: "1",
+    author: "Sarah Chen",
+    handle: "@sarahbuilds",
+    tweet: "Finally hit 10K followers! The biggest lesson: consistency beats perfection every single time.",
+    score: 94,
+    suggestedReply: "Congrats on 10K! Totally agree on consistency. What I'd add: reply strategy matters just as much. Most people post and disappear. Reply to 20 posts daily in your niche and watch what happens.",
+    time: "2h ago"
+  },
+  {
+    id: "2",
+    author: "Mike Johnson",
+    handle: "@mikegrows",
+    tweet: "My engagement is stuck at 1.5%. Posting daily but seeing zero growth. What am I missing?",
+    score: 89,
+    suggestedReply: "The issue is probably timing + reply placement. Try this: post at peak hours (check your analytics), then immediately reply to 5-10 trending posts in your niche. Your profile taps will spike.",
+    time: "1h ago"
+  },
+  {
+    id: "3",
+    author: "Alex Rivera",
+    handle: "@alexonx",
+    tweet: "Anyone have a playbook for turning X followers into actual customers?",
+    score: 86,
+    suggestedReply: "Here's what works: clear offer in bio, proof in your content, and strategic CTAs in high-performing posts. Most people miss the bio optimization part.",
+    time: "45m ago"
+  }
 ]
 
 const SCHEDULED_POSTS = [
-  { id: "1", time: "Today, 12:00 PM", content: "The reply habit that added 300 followers in 7 days. Here's the exact framework...", status: "Next", type: "Thread" },
-  { id: "2", time: "Tomorrow, 9:00 AM", content: "Why most founders fail at distribution...", status: "Scheduled", type: "Post" },
-  { id: "3", time: "Tomorrow, 5:00 PM", content: "My tech stack for 2026...", status: "Scheduled", type: "Post" },
-]
-
-const VIRAL_POSTS = [
-  { id: "1", topic: "SaaS Growth", hook: "How I went from $0 to $10k MRR in 30 days without ads.", virality: 98, saves: "12K" },
-  { id: "2", topic: "AI Coding", hook: "Stop writing boilerplate code. Use these 5 Cursor shortcuts instead.", virality: 95, saves: "8.4K" },
-  { id: "3", topic: "Productivity", hook: "I tracked every minute of my work for a year. Here is what I learned.", virality: 92, saves: "15K" },
-]
-
-const INBOX_ITEMS = [
-  { id: "1", user: "Alex Rivera", handle: "@arivera", message: "Hey, loved your thread on retention. Do you use any specific tools for...", time: "10m", unread: true },
-  { id: "2", user: "Growth DAO", handle: "@growthdao", message: "Mentioned you in a post: 'Top 5 accounts to follow for...'", time: "2h", unread: false },
+  {
+    id: "1",
+    content: "The reply habit that added 300 followers in 7 days. Here's the exact framework...",
+    time: "Today, 6:00 PM",
+    status: "scheduled" as const
+  },
+  {
+    id: "2",
+    content: "Most people think X growth is about posting. It's actually about strategic replies. Here's why...",
+    time: "Tomorrow, 12:00 PM",
+    status: "scheduled" as const
+  }
 ]
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState<TabID>("overview")
   const [timeRange, setTimeRange] = useState<TimeRange>("30D")
+  const [activeTab, setActiveTab] = useState<TabType>("overview")
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [contentTopic, setContentTopic] = useState("")
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [contentStyle, setContentStyle] = useState("founder-story")
+  const [generatedContent, setGeneratedContent] = useState("")
+  const [signalScore, setSignalScore] = useState(0)
+  
+  // AI Credits System
+  const [aiCredits, setAiCredits] = useState({
+    used: 23,
+    total: 100,
+    resetIn: "11h 23m"
+  })
 
-  const TABS = [
-    { id: "overview", label: "Overview", icon: LayoutGrid },
-    { id: "inspiration", label: "Inspiration", icon: Flame },
-    { id: "studio", label: "Studio", icon: Sparkles },
-    { id: "schedule", label: "Schedule", icon: Calendar },
-    { id: "engage", label: "Engage", icon: Inbox },
-    { id: "analytics", label: "Analytics", icon: BarChart3 },
-  ]
+  const metrics = METRICS[timeRange]
+
+  const generateContent = () => {
+    // Deduct credits
+    if (aiCredits.used >= aiCredits.total) {
+      alert("Daily AI credits exhausted! Resets in " + aiCredits.resetIn)
+      return
+    }
+
+    const templates: Record<string, string[]> = {
+      "founder-story": [
+        `Built ${contentTopic || "my product"} to solve my own problem. Here's what I learned after 90 days of execution...`,
+        `The biggest mistake I made with ${contentTopic || "my launch"}? Thinking I needed everything perfect. Here's what actually worked...`,
+      ],
+      "contrarian": [
+        `Everyone tells you to ${contentTopic || "post daily"}. I did the opposite and 3X'd my growth. Here's why...`,
+        `Unpopular opinion about ${contentTopic || "X growth"}: Most advice is wrong. Here's what actually works...`,
+      ],
+      "framework": [
+        `The simple framework I use for ${contentTopic || "consistent growth"}: 1. Post once daily 2. Reply to 20 posts 3. Analyze what works 4. Repeat`,
+        `My 3-step system for ${contentTopic || "X success"}: First, build trust. Second, provide value. Third, make the ask. Most skip step 1.`,
+      ]
+    }
+
+    const styleTemplates = templates[contentStyle] || templates["founder-story"]
+    const random = styleTemplates[Math.floor(Math.random() * styleTemplates.length)]
+    setGeneratedContent(random)
+    setSignalScore(Math.floor(Math.random() * 15) + 85)
+    
+    // Deduct credit
+    setAiCredits(prev => ({ ...prev, used: prev.used + 1 }))
+  }
+
+  const creditPercentage = (aiCredits.used / aiCredits.total) * 100
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-white/20">
-
-      {/* Top Navigation (X.com style) */}
-      <nav className="sticky top-0 z-50 border-b border-white/5 bg-black/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <div className="text-xl font-bold tracking-tight flex items-center gap-2">
-              <div className="w-8 h-8 bg-white text-black rounded-lg flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+    <div className="min-h-screen bg-[#0a0a0a] text-white font-mono">
+      {/* Sidebar */}
+      <aside className={`fixed top-0 left-0 h-screen bg-[#111] border-r border-[#222] transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-20'} z-50`}>
+        <div className="p-6 border-b border-[#222]">
+          <div className="flex items-center justify-between">
+            {sidebarOpen && (
+              <div className="font-['Bebas_Neue'] text-2xl tracking-wider text-[#00ff88]">
+                LAUNCHALONE
               </div>
-              LaunchAlone
-            </div>
-
-            <div className="hidden md:flex items-center gap-1">
-              {TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as TabID)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${activeTab === tab.id
-                      ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)]"
-                      : "text-white/60 hover:text-white hover:bg-white/5"
-                    }`}
-                >
-                  <tab.icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button className="p-2 text-white/60 hover:text-white transition-colors relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-black" />
+            )}
+            <button 
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 hover:bg-[#222] rounded transition-colors"
+            >
+              <MoreHorizontal className="w-5 h-5" />
             </button>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-neutral-800 to-neutral-700 border border-white/10" />
           </div>
         </div>
-      </nav>
 
-      {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+        {/* AI Credits Bar - NEW */}
+        {sidebarOpen && (
+          <div className="px-4 py-6 border-b border-[#222]">
+            <div className="mb-2 flex items-center justify-between text-xs">
+              <span className="uppercase tracking-widest text-gray-500">AI Credits</span>
+              <span className="text-[#00ff88]">{aiCredits.total - aiCredits.used}/{aiCredits.total}</span>
+            </div>
+            <div className="h-2 w-full bg-[#222] rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-[#00ff88] to-[#00cc66] transition-all duration-300"
+                style={{ width: `${100 - creditPercentage}%` }}
+              />
+            </div>
+            <div className="mt-2 text-xs text-gray-500">
+              Resets in {aiCredits.resetIn}
+            </div>
+          </div>
+        )}
 
-        {/* OVERVIEW TAB */}
-        {activeTab === "overview" && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-end justify-between">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight mb-2">Command Center</h1>
-                <p className="text-white/40">Your daily growth signals.</p>
+        <nav className="p-4 space-y-2">
+          {[
+            { id: "overview", icon: BarChart3, label: "Overview" },
+            { id: "content", icon: Sparkles, label: "Content Studio" },
+            { id: "replies", icon: MessageCircle, label: "Reply Finder" },
+            { id: "schedule", icon: Calendar, label: "Schedule" },
+            { id: "profile", icon: User, label: "Profile Review" },
+          ].map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id as TabType)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                activeTab === item.id
+                  ? 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/30'
+                  : 'text-gray-400 hover:bg-[#222] hover:text-white'
+              }`}
+            >
+              <item.icon className="w-5 h-5" />
+              {sidebarOpen && <span className="text-sm uppercase tracking-wider">{item.label}</span>}
+            </button>
+          ))}
+        </nav>
+
+        {sidebarOpen && (
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#222]">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00ff88] to-[#00cc66] flex items-center justify-center font-bold">
+                P
               </div>
-              <div className="flex bg-white/5 rounded-lg p-1 border border-white/5">
+              <div className="flex-1">
+                <div className="text-sm font-bold">@pedro</div>
+                <div className="text-xs text-gray-500">Pro Plan</div>
+              </div>
+            </div>
+            <button className="w-full flex items-center gap-2 px-4 py-2 text-gray-400 hover:text-white transition-colors">
+              <Settings className="w-4 h-4" />
+              <span className="text-xs">Settings</span>
+            </button>
+            <button className="w-full flex items-center gap-2 px-4 py-2 text-gray-400 hover:text-white transition-colors">
+              <LogOut className="w-4 h-4" />
+              <span className="text-xs">Sign Out</span>
+            </button>
+          </div>
+        )}
+      </aside>
+
+      {/* Main Content */}
+      <main className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
+        {/* Header */}
+        <header className="sticky top-0 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-[#222] p-6 z-40">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-['Bebas_Neue'] tracking-wider mb-1">
+                {activeTab === "overview" && "COMMAND CENTER"}
+                {activeTab === "content" && "CONTENT STUDIO"}
+                {activeTab === "replies" && "REPLY OPPORTUNITIES"}
+                {activeTab === "schedule" && "POST SCHEDULE"}
+                {activeTab === "profile" && "PROFILE REVIEW"}
+              </h1>
+              <p className="text-sm text-gray-500">
+                {activeTab === "overview" && "Your X growth engine running 24/7"}
+                {activeTab === "content" && "AI-powered content generation with signal scoring"}
+                {activeTab === "replies" && "High-impact reply opportunities refreshed every 5min"}
+                {activeTab === "schedule" && "Smart timing for maximum reach"}
+                {activeTab === "profile" && "AI-powered profile optimization"}
+              </p>
+            </div>
+
+            {activeTab === "overview" && (
+              <div className="flex gap-2 bg-[#111] p-1 rounded-lg border border-[#222]">
                 {(["7D", "30D", "90D"] as TimeRange[]).map((range) => (
                   <button
                     key={range}
                     onClick={() => setTimeRange(range)}
-                    className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${timeRange === range ? "bg-white/10 text-white" : "text-white/40 hover:text-white"
-                      }`}
+                    className={`px-4 py-2 text-xs uppercase tracking-widest rounded transition-all ${
+                      timeRange === range
+                        ? 'bg-[#00ff88] text-black font-bold'
+                        : 'text-gray-400 hover:text-white'
+                    }`}
                   >
                     {range}
                   </button>
                 ))}
               </div>
-            </div>
+            )}
+          </div>
+        </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {METRICS[timeRange].map((metric, i) => (
-                <div key={i} className="glass-card rounded-2xl p-6 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ArrowUpRight className="w-5 h-5 text-white/20" />
-                  </div>
-                  <div className="text-white/60 text-sm font-medium mb-4">{metric.label}</div>
-                  <div className="flex items-baseline gap-3">
-                    <div className="text-4xl font-bold tracking-tight">{metric.value}</div>
-                    <div className="text-green-400 text-sm font-medium bg-green-400/10 px-2 py-0.5 rounded-full border border-green-400/20">
+        {/* Content Area */}
+        <div className="p-6 max-w-7xl mx-auto">
+          {/* OVERVIEW TAB */}
+          {activeTab === "overview" && (
+            <div className="space-y-6">
+              {/* Metrics Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {metrics.map((metric, i) => (
+                  <div key={i} className="bg-[#111] border border-[#222] rounded-xl p-6 hover:border-[#00ff88]/30 transition-all group">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="text-xs uppercase tracking-widest text-gray-500">
+                        {metric.label}
+                      </div>
+                      <TrendingUp className="w-4 h-4 text-[#00ff88]" />
+                    </div>
+                    <div className="text-4xl font-['Bebas_Neue'] tracking-wider mb-2">
+                      {metric.value}
+                    </div>
+                    <div className="text-sm text-[#00ff88] flex items-center gap-1">
+                      <ArrowRight className="w-3 h-3" />
                       {metric.change}
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-8">
-                <div className="glass-panel p-6 rounded-2xl border border-white/5">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="font-semibold text-lg">Growth Trajectory</h3>
-                    <div className="flex items-center gap-2 text-sm text-white/40">
-                      <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-                      On Track
-                    </div>
-                  </div>
-                  <div className="h-64 flex items-end justify-between gap-1 px-2">
-                    {Array.from({ length: 40 }).map((_, i) => (
-                      <div key={i} className="w-full bg-white/5 rounded-t-sm hover:bg-white/20 transition-all duration-300" style={{ height: `${20 + Math.random() * 60}%` }} />
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Reply Opportunities (Live)</h3>
-                  <div className="space-y-4">
-                    {REPLY_OPPORTUNITIES.map((opp) => (
-                      <div key={opp.id} className="glass-card p-6 rounded-2xl hover:border-white/20 transition-all cursor-pointer group">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex items-center gap-2">
-                            <div className="font-bold">{opp.author}</div>
-                            <div className="text-white/40 text-sm">{opp.handle} · {opp.time}</div>
-                          </div>
-                          <div className="text-xs font-mono text-white/40 bg-white/5 px-2 py-1 rounded group-hover:bg-white/10 transition-colors">
-                            Score: {opp.score}
-                          </div>
-                        </div>
-                        <p className="text-white/80 leading-relaxed mb-4">{opp.tweet}</p>
-                        <button className="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm font-medium text-white/80 transition-colors">Draft Reply</button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="glass-panel p-6 rounded-2xl h-full border border-white/5">
-                  <h3 className="font-semibold text-lg mb-6">Queue</h3>
-                  <div className="space-y-6">
-                    {SCHEDULED_POSTS.map((post, i) => (
-                      <div key={i} className="relative pl-6 pb-6 border-l border-white/10 last:pb-0 last:border-0">
-                        <div className={`absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full border-2 border-black ${i === 0 ? 'bg-white shadow-[0_0_10px_white]' : 'bg-white/20'}`} />
-                        <div className="text-xs font-mono text-white/40 mb-1">{post.time}</div>
-                        <div className="p-3 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors">
-                          <p className="text-sm text-white/80 line-clamp-2">{post.content}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* INSPIRATION TAB */}
-        {activeTab === "inspiration" && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-3xl font-bold tracking-tight mb-2">Viral Library</h2>
-                <p className="text-white/40">Discover high-performing content in your niche.</p>
-              </div>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                <input type="text" placeholder="Search keywords..." className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-white/30 w-64" />
-              </div>
-            </div>
-
-            <div className="flex gap-2 pb-4 overflow-x-auto">
-              {["All", "SaaS", "AI", "Marketing", "Productivity", "Writing"].map((tag) => (
-                <button key={tag} className="px-4 py-1.5 rounded-full border border-white/10 hover:bg-white/10 text-sm text-white/80 transition-colors">
-                  {tag}
-                </button>
-              ))}
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {VIRAL_POSTS.map((post) => (
-                <div key={post.id} className="glass-card p-6 rounded-2xl hover:border-white/20 transition-all group cursor-pointer">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 text-xs font-medium border border-blue-500/20">{post.topic}</div>
-                    <div className="flex items-center gap-1 text-white/40 text-xs">
-                      <Bookmark className="w-3 h-3" />
-                      {post.saves}
-                    </div>
-                  </div>
-                  <h3 className="font-medium text-lg mb-2 text-white/90 group-hover:text-white transition-colors">"{post.hook}"</h3>
-                  <div className="w-full h-px bg-white/5 my-4" />
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-white/40">Virality Score</div>
-                    <div className="text-green-400 font-mono font-bold">{post.virality}/100</div>
-                  </div>
-                  <button className="w-full mt-4 py-2 rounded-lg bg-white text-black font-bold text-sm hover:bg-white/90 transition-colors">Remix with AI</button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* STUDIO TAB */}
-        {activeTab === "studio" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight mb-2">Content Studio</h2>
-                <p className="text-white/40">Draft high-signal posts in seconds.</p>
-              </div>
-
-              <div className="glass-panel p-1 rounded-xl bg-white/5 border border-white/5">
-                <textarea
-                  className="w-full h-40 bg-transparent text-lg p-4 resize-none focus:outline-none placeholder:text-white/20"
-                  placeholder="What's on your mind? e.g. Scaling from 0 to 1k users..."
-                  value={contentTopic}
-                  onChange={(e) => setContentTopic(e.target.value)}
-                />
-                <div className="flex items-center justify-between px-4 pb-4">
-                  <div className="flex gap-2">
-                    <button className="p-2 text-white/40 hover:text-white transition-colors rounded-lg hover:bg-white/5"><Hash className="w-4 h-4" /></button>
-                    <button className="p-2 text-white/40 hover:text-white transition-colors rounded-lg hover:bg-white/5"><Users className="w-4 h-4" /></button>
-                  </div>
-                  <button onClick={() => setIsGenerating(true)} className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-lg font-medium hover:bg-white/90 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-                    <Sparkles className="w-4 h-4" />
-                    {isGenerating ? "Refining..." : "Enhance"}
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {["Thread Builder", "Hook Generator", "Viral Rewrite", "Tone Check"].map((tool) => (
-                  <button key={tool} className="p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10 text-left transition-all group">
-                    <div className="text-white/80 font-medium mb-1 group-hover:text-white">{tool}</div>
-                    <div className="text-xs text-white/40">AI Powered</div>
-                  </button>
                 ))}
               </div>
-            </div>
 
-            <div className="hidden lg:block space-y-6">
-              <div className="bg-black border border-white/10 rounded-2xl p-6 relative">
-                <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none rounded-2xl" />
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-neutral-800 border border-white/10" />
-                  <div><div className="font-bold text-white">Pedro <span className="text-white/40 font-normal">@pedro</span></div></div>
-                </div>
-                <div className="space-y-4 text-white/90 text-lg leading-relaxed">
-                  <p>Most founders overcomplicate growth.</p>
-                  <p>They focus on viral hacks instead of consistency.</p>
-                  <p>I built my startup to $10k MRR by doing 1 boring thing every day for 90 days.</p>
-                  <p>Here is the breakdown 🧵</p>
-                </div>
-                <div className="mt-6 pt-6 border-t border-white/10 flex items-center justify-center gap-8 text-white/40 text-sm">
-                  <div className="flex items-center gap-2"><MessageCircle className="w-4 h-4" /> 24</div>
-                  <div className="flex items-center gap-2"><Repeat className="w-4 h-4" /> 12</div>
-                  <div className="flex items-center gap-2"><ThumbsUp className="w-4 h-4" /> 148</div>
-                  <div className="flex items-center gap-2"><BarChart3 className="w-4 h-4" /> 24K</div>
+              {/* Growth Chart */}
+              <div className="bg-[#111] border border-[#222] rounded-xl p-6">
+                <h3 className="text-lg font-['Bebas_Neue'] tracking-wider mb-4">GROWTH TRAJECTORY</h3>
+                <div className="h-64 flex items-end justify-between gap-2">
+                  {Array.from({ length: 30 }).map((_, i) => {
+                    const height = Math.random() * 100
+                    return (
+                      <div
+                        key={i}
+                        className="flex-1 bg-gradient-to-t from-[#00ff88]/50 to-[#00ff88]/10 rounded-t hover:from-[#00ff88] transition-all cursor-pointer"
+                        style={{ height: `${height}%` }}
+                      />
+                    )
+                  })}
                 </div>
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* SCHEDULE TAB */}
-        {activeTab === "schedule" && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-3xl font-bold tracking-tight mb-2">Growth Engine</h2>
-                <p className="text-white/40">Your automated queue system.</p>
-              </div>
-              <button className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                <Clock className="w-4 h-4" /> Edit Slots
-              </button>
-            </div>
-
-            <div className="grid lg:grid-cols-7 gap-4">
-              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, i) => (
-                <div key={day} className={`p-4 rounded-xl border ${i === 2 ? 'border-white/20 bg-white/5' : 'border-white/5 bg-black'} min-h-[200px]`}>
-                  <div className="text-sm font-medium text-white/60 mb-4 flex justify-between">
-                    {day}
-                    {i === 2 && <span className="text-xs bg-green-500/20 text-green-400 px-2 rounded-full">Today</span>}
-                  </div>
-                  <div className="space-y-2">
-                    <div className="p-2 rounded bg-white/10 text-xs border border-white/10 cursor-pointer hover:bg-white/20 transition-colors">
-                      <span className="text-white/40 block mb-1">09:00 AM</span>
-                      <span className="font-medium">Thread: Growth...</span>
-                    </div>
-                    <div className="p-2 rounded border border-dashed border-white/20 text-xs text-center text-white/20 hover:border-white/40 hover:text-white/60 cursor-pointer transition-all">
-                      + Add Content
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ENGAGE TAB */}
-        {activeTab === "engage" && (
-          <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold tracking-tight">Social Hub</h2>
-              <div className="flex gap-2">
-                <button className="px-4 py-2 rounded-lg bg-white text-black font-medium text-sm">Mentions</button>
-                <button className="px-4 py-2 rounded-lg hover:bg-white/10 text-white/60 font-medium text-sm transition-colors">Verified</button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              {INBOX_ITEMS.map((item) => (
-                <div key={item.id} className={`p-4 rounded-xl border ${item.unread ? 'border-white/20 bg-white/5' : 'border-white/5 bg-transparent'} hover:bg-white/5 transition-colors cursor-pointer flex gap-4`}>
-                  <div className="w-12 h-12 rounded-full bg-neutral-800" />
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold">{item.user}</span>
-                        <span className="text-white/40 text-sm">{item.handle}</span>
+              {/* Top Content + Account Health */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-[#111] border border-[#222] rounded-xl p-6">
+                  <h3 className="text-lg font-['Bebas_Neue'] tracking-wider mb-4 flex items-center gap-2">
+                    <Flame className="w-5 h-5 text-[#00ff88]" />
+                    TOP POSTS
+                  </h3>
+                  <div className="space-y-3">
+                    {[
+                      { content: "The reply habit that fixed my reach", stats: "42K impressions • 612 saves" },
+                      { content: "Simple framework to turn views into clicks", stats: "31K impressions • 3.4% CTR" },
+                      { content: "What I learned after 100 customer calls", stats: "28K impressions • 421 saves" }
+                    ].map((post, i) => (
+                      <div key={i} className="bg-[#0a0a0a] border border-[#222] rounded-lg p-4 hover:border-[#00ff88]/30 transition-all cursor-pointer">
+                        <div className="text-sm mb-2">{post.content}</div>
+                        <div className="text-xs text-gray-500">{post.stats}</div>
                       </div>
-                      <span className="text-white/40 text-xs">{item.time}</span>
-                    </div>
-                    <p className="text-white/80">{item.message}</p>
+                    ))}
                   </div>
-                  {item.unread && <div className="w-2 h-2 rounded-full bg-blue-500 mt-2" />}
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
 
-        {/* ANALYTICS TAB */}
-        {activeTab === "analytics" && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold tracking-tight">Deep Dive</h2>
-              <button className="border border-white/10 px-4 py-2 rounded-lg text-sm hover:bg-white/5 transition-colors">Export Report</button>
+                <div className="bg-[#111] border border-[#222] rounded-xl p-6">
+                  <h3 className="text-lg font-['Bebas_Neue'] tracking-wider mb-4 flex items-center gap-2">
+                    <Target className="w-5 h-5 text-[#00ff88]" />
+                    ACCOUNT HEALTH
+                  </h3>
+                  <div className="space-y-3">
+                    {[
+                      { label: "Rate Limit", value: "Safe", icon: Shield },
+                      { label: "Content Risk", value: "Low", icon: Activity },
+                      { label: "Shadow Check", value: "Clear", icon: Eye },
+                      { label: "Automation Pace", value: "Balanced", icon: Zap }
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center justify-between bg-[#0a0a0a] border border-[#222] rounded-lg p-4">
+                        <div className="flex items-center gap-3">
+                          <item.icon className="w-4 h-4 text-[#00ff88]" />
+                          <span className="text-sm">{item.label}</span>
+                        </div>
+                        <span className="text-sm text-[#00ff88] font-bold">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
+          )}
 
+          {/* CONTENT STUDIO TAB */}
+          {activeTab === "content" && (
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="glass-panel p-6 rounded-2xl border border-white/5">
-                <h3 className="font-medium mb-6">Activity Heatmap</h3>
-                <div className="grid grid-cols-12 gap-1 gap-y-1">
-                  {Array.from({ length: 60 }).map((_, i) => (
-                    <div key={i} className={`w-full aspect-square rounded-sm ${Math.random() > 0.7 ? 'bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]' : Math.random() > 0.4 ? 'bg-green-500/40' : 'bg-white/5'}`} />
-                  ))}
-                </div>
-                <div className="mt-4 flex items-center justify-end gap-2 text-xs text-white/40">
-                  <span>Less</span>
-                  <div className="flex gap-1">
-                    <div className="w-3 h-3 bg-white/5 rounded-sm" />
-                    <div className="w-3 h-3 bg-green-500/40 rounded-sm" />
-                    <div className="w-3 h-3 bg-green-500 rounded-sm" />
+              <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-6">
+                <div>
+                  <h3 className="text-lg font-['Bebas_Neue'] tracking-wider mb-4">GENERATE CONTENT</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
+                        Topic / Hook
+                      </label>
+                      <input
+                        type="text"
+                        value={contentTopic}
+                        onChange={(e) => setContentTopic(e.target.value)}
+                        placeholder="e.g., building in public, X growth strategy"
+                        className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-4 py-3 text-sm focus:border-[#00ff88] focus:outline-none transition-colors"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
+                        Content Style
+                      </label>
+                      <select
+                        value={contentStyle}
+                        onChange={(e) => setContentStyle(e.target.value)}
+                        className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-4 py-3 text-sm focus:border-[#00ff88] focus:outline-none transition-colors"
+                      >
+                        <option value="founder-story">Founder Story</option>
+                        <option value="contrarian">Contrarian Take</option>
+                        <option value="framework">Simple Framework</option>
+                      </select>
+                    </div>
+
+                    <button
+                      onClick={generateContent}
+                      disabled={aiCredits.used >= aiCredits.total}
+                      className="w-full bg-[#00ff88] text-black px-6 py-3 rounded-lg font-bold uppercase tracking-wider hover:bg-[#00cc66] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Sparkles className="w-5 h-5" />
+                      Generate ({aiCredits.total - aiCredits.used} credits left)
+                    </button>
                   </div>
-                  <span>More</span>
                 </div>
               </div>
 
-              <div className="glass-panel p-6 rounded-2xl border border-white/5">
-                <h3 className="font-medium mb-6">Audience Demographics</h3>
-                <div className="space-y-4">
-                  {[{ l: "Founders", v: "45%" }, { l: "Engineers", v: "30%" }, { l: "Investors", v: "15%" }].map((stat) => (
-                    <div key={stat.l}>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-white/60">{stat.l}</span>
-                        <span className="font-bold">{stat.v}</span>
+              <div className="bg-[#111] border border-[#222] rounded-xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-['Bebas_Neue'] tracking-wider">PREVIEW</h3>
+                  {signalScore > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs uppercase tracking-widest text-gray-500">Signal Score</span>
+                      <span className="text-2xl font-['Bebas_Neue'] text-[#00ff88]">{signalScore}/100</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-[#0a0a0a] border border-[#222] rounded-lg p-4 min-h-[200px] mb-4">
+                  {generatedContent ? (
+                    <p className="text-sm leading-relaxed">{generatedContent}</p>
+                  ) : (
+                    <p className="text-sm text-gray-500">Generated content will appear here...</p>
+                  )}
+                </div>
+
+                {generatedContent && (
+                  <div className="flex gap-3">
+                    <button className="flex-1 border border-[#00ff88] text-[#00ff88] px-4 py-2 rounded-lg font-bold uppercase tracking-wider text-xs hover:bg-[#00ff88]/10 transition-all flex items-center justify-center gap-2">
+                      <Copy className="w-4 h-4" />
+                      Copy
+                    </button>
+                    <button className="flex-1 bg-[#00ff88] text-black px-4 py-2 rounded-lg font-bold uppercase tracking-wider text-xs hover:bg-[#00cc66] transition-all flex items-center justify-center gap-2">
+                      <Send className="w-4 h-4" />
+                      Post Now
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* REPLIES TAB - Keep existing */}
+          {activeTab === "replies" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-[#00ff88]"></span>
+                  </div>
+                  <span className="text-xs uppercase tracking-widest text-gray-500">
+                    Refreshed 2min ago • {REPLY_OPPORTUNITIES.length} opportunities
+                  </span>
+                </div>
+              </div>
+
+              {REPLY_OPPORTUNITIES.map((opportunity) => (
+                <div key={opportunity.id} className="bg-[#111] border border-[#222] rounded-xl p-6 hover:border-[#00ff88]/30 transition-all">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="font-bold">{opportunity.author}</span>
+                        <span className="text-gray-500 text-sm">{opportunity.handle}</span>
+                        <span className="text-xs text-gray-600">{opportunity.time}</span>
                       </div>
-                      <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full bg-white rounded-full" style={{ width: stat.v }} />
+                      <div className="inline-flex items-center gap-2 bg-[#00ff88]/10 border border-[#00ff88]/30 px-3 py-1 rounded-full">
+                        <Zap className="w-3 h-3 text-[#00ff88]" />
+                        <span className="text-xs uppercase tracking-widest text-[#00ff88]">
+                          Signal {opportunity.score}/100
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#0a0a0a] border border-[#222] rounded-lg p-4 mb-4">
+                    <p className="text-sm leading-relaxed">{opportunity.tweet}</p>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-[#00ff88]/5 to-transparent border-l-2 border-[#00ff88] pl-4 py-3 mb-4">
+                    <div className="text-xs uppercase tracking-widest text-gray-500 mb-2">
+                      Suggested Reply
+                    </div>
+                    <p className="text-sm leading-relaxed">{opportunity.suggestedReply}</p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button className="flex-1 bg-[#00ff88] text-black px-4 py-2 rounded-lg font-bold uppercase tracking-wider text-xs hover:bg-[#00cc66] transition-all">
+                      Post Reply
+                    </button>
+                    <button className="px-4 py-2 border border-[#222] rounded-lg font-bold uppercase tracking-wider text-xs hover:border-[#00ff88] hover:text-[#00ff88] transition-all">
+                      Edit
+                    </button>
+                    <button className="px-4 py-2 border border-[#222] rounded-lg font-bold uppercase tracking-wider text-xs hover:border-red-500 hover:text-red-500 transition-all">
+                      Skip
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* SCHEDULE TAB - Keep existing */}
+          {activeTab === "schedule" && (
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-['Bebas_Neue'] tracking-wider">SCHEDULED POSTS</h3>
+                {SCHEDULED_POSTS.map((post) => (
+                  <div key={post.id} className="bg-[#111] border border-[#222] rounded-xl p-4 hover:border-[#00ff88]/30 transition-all">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-[#00ff88]" />
+                        <span className="text-xs uppercase tracking-widest text-gray-500">{post.time}</span>
+                      </div>
+                      <span className="px-2 py-1 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-xs uppercase tracking-widest text-[#00ff88]">
+                        {post.status}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-300">{post.content}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <h3 className="text-lg font-['Bebas_Neue'] tracking-wider mb-4">OPTIMAL TIMING</h3>
+                <div className="space-y-3">
+                  {[
+                    { time: "6:00 AM", score: 85, reason: "Morning warm up" },
+                    { time: "12:00 PM", score: 90, reason: "Lunch scroll peak" },
+                    { time: "5:00 PM", score: 95, reason: "After work reset" },
+                    { time: "8:00 PM", score: 88, reason: "Evening wind down" }
+                  ].map((slot, i) => (
+                    <div key={i} className="bg-[#111] border border-[#222] rounded-xl p-4 flex items-center justify-between hover:border-[#00ff88]/30 transition-all cursor-pointer">
+                      <div>
+                        <div className="text-xl font-['Bebas_Neue'] tracking-wider">{slot.time}</div>
+                        <div className="text-xs text-gray-500">{slot.reason}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-3xl font-['Bebas_Neue'] text-[#00ff88]">{slot.score}</div>
+                        <div className="text-xs uppercase tracking-widest text-gray-500">Score</div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
+          {/* PROFILE REVIEW TAB - NEW */}
+          {activeTab === "profile" && (
+            <div className="space-y-6">
+              <div className="bg-[#111] border border-[#222] rounded-xl p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-['Bebas_Neue'] tracking-wider">PROFILE ANALYSIS</h3>
+                  <button className="px-4 py-2 bg-[#00ff88] text-black rounded-lg font-bold uppercase tracking-wider text-xs hover:bg-[#00cc66] transition-all">
+                    Refresh Analysis
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-6">
+                  {[
+                    { label: "Bio Score", value: "72/100", color: "text-yellow-500" },
+                    { label: "Content Quality", value: "88/100", color: "text-[#00ff88]" },
+                    { label: "Engagement Rate", value: "3.4%", color: "text-[#00ff88]" },
+                  ].map((stat, i) => (
+                    <div key={i} className="bg-[#0a0a0a] border border-[#222] rounded-lg p-4 text-center">
+                      <div className="text-xs uppercase tracking-widest text-gray-500 mb-2">
+                        {stat.label}
+                      </div>
+                      <div className={`text-3xl font-['Bebas_Neue'] ${stat.color}`}>
+                        {stat.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-[#111] border border-[#222] rounded-xl p-6">
+                  <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    Bio Optimization
+                  </h3>
+                  <div className="bg-[#0a0a0a] border border-[#222] rounded-lg p-4 space-y-3">
+                    <div>
+                      <p className="text-xs text-gray-500 mb-2">Missing Elements:</p>
+                      <ul className="text-sm space-y-1">
+                        <li className="flex items-center gap-2">
+                          <span className="text-[#00ff88]">•</span> Clear value proposition
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-[#00ff88]">•</span> Call-to-action
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-[#00ff88]">•</span> Social proof
+                        </li>
+                      </ul>
+                    </div>
+                    <button className="w-full px-4 py-2 border border-[#00ff88] text-[#00ff88] rounded-lg font-bold uppercase tracking-wider text-xs hover:bg-[#00ff88]/10 transition-all">
+                      Generate Improved Bio
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-[#111] border border-[#222] rounded-xl p-6">
+                  <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-[#00ff88]"></div>
+                    Content Recommendations
+                  </h3>
+                  <div className="bg-[#0a0a0a] border border-[#222] rounded-lg p-4 space-y-3">
+                    <p className="text-sm text-gray-400">
+                      Based on your top-performing posts, focus on:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded-full text-xs">
+                        How-to threads
+                      </span>
+                      <span className="px-3 py-1 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded-full text-xs">
+                        Personal stories
+                      </span>
+                      <span className="px-3 py-1 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded-full text-xs">
+                        Data-driven insights
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   )

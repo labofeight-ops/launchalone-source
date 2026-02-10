@@ -1,0 +1,124 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* X.ai / X.com Inspired Theme */
+  
+  /* Pure Black Backgrounds */
+  --background: 0 0% 0%; /* #000000 */
+  --foreground: 0 0% 100%; /* #FFFFFF */
+
+  /* Subtle Card Backgrounds (Off-Black) */
+  --card: 0 0% 3%; /* #080808 */
+  --card-foreground: 0 0% 100%;
+
+  /* Borders (Subtle Gray) */
+  --border: 0 0% 12%; /* #1F1F1F */
+  --input: 0 0% 12%;
+  
+  /* Primary Action (White Glow) */
+  --primary: 0 0% 100%;
+  --primary-foreground: 0 0% 0%;
+
+  /* Secondary/Muted */
+  --secondary: 0 0% 8%; /* #141414 */
+  --secondary-foreground: 0 0% 60%; /* #999999 */
+  
+  --muted: 0 0% 8%;
+  --muted-foreground: 0 0% 40%; /* #666666 */
+
+  /* Accents (Subtle Electric Blue - X Premium) */
+  --accent: 210 100% 50%; /* #0088FF - Optional use */
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+
+  --ring: 0 0% 100%;
+  --radius: 0.75rem; /* 12px - Modern rounded corners */
+}
+
+@theme inline {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* X.ai Glassmorphism */
+.glass-panel {
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: linear-gradient(180deg, rgba(25, 25, 25, 0.4) 0%, rgba(10, 10, 10, 0.4) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+}
+
+.glass-card:hover {
+  background: linear-gradient(180deg, rgba(35, 35, 35, 0.5) 0%, rgba(20, 20, 20, 0.5) 100%);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+  transition: all 0.2s ease-out;
+}
+
+/* Subtle Glow Text */
+.text-glow {
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}

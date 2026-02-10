@@ -1,10 +1,11 @@
 import { Navigation } from "@/components/navigation"
 import { HeroSection } from "@/components/hero-section"
 import { StatsSection } from "@/components/stats-section"
+import { VisualPreviewSection } from "@/components/visual-preview-section"
 import { FeaturesSection } from "@/components/features-section"
 import { HowItWorksSection } from "@/components/how-it-works-section"
-import { ReviewsSection } from "@/components/reviews-section"
 import { PricingSection } from "@/components/pricing-section"
+import { ReviewsSection } from "@/components/reviews-section"
 import { FooterSection } from "@/components/footer-section"
 
 export default function Page() {
@@ -16,10 +17,11 @@ export default function Page() {
         <Navigation />
         <HeroSection />
         <StatsSection />
+        <VisualPreviewSection />
         <HowItWorksSection />
         <FeaturesSection />
-        <ReviewsSection />
         <PricingSection />
+        <ReviewsSection />
         <FooterSection />
       </div>
     </main>

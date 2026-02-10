@@ -66,8 +66,8 @@ export function PricingSection() {
             <div
               key={index}
               className={`relative flex flex-col p-8 rounded-3xl transition-all duration-300 ${plan.highlight
-                  ? "bg-white text-black ring-4 ring-white/20 scale-105 z-10"
-                  : "bg-white/5 text-white hover:bg-white/10 border border-white/5"
+                ? "bg-white text-black ring-4 ring-white/20 scale-105 z-10"
+                : "bg-white/5 text-white hover:bg-white/10 border border-white/5"
                 }`}
             >
               <div className="mb-8">
@@ -90,14 +90,15 @@ export function PricingSection() {
                 ))}
               </ul>
 
-              <button
-                className={`w-full py-4 rounded-xl font-bold transition-all ${plan.highlight
-                    ? "bg-black text-white hover:bg-black/80"
-                    : "bg-white text-black hover:bg-white/90"
+              <a
+                href="/login"
+                className={`w-full py-4 rounded-xl font-bold transition-all text-center block ${plan.highlight
+                  ? "bg-black text-white hover:bg-black/80"
+                  : "bg-white text-black hover:bg-white/90"
                   }`}
               >
                 {plan.cta}
-              </button>
+              </a>
             </div>
           ))}
         </div>

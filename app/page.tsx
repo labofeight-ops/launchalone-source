@@ -1,7 +1,7 @@
 import { Navigation } from "@/components/navigation"
 import { HeroSection } from "@/components/hero-section"
 import { StatsSection } from "@/components/stats-section"
-import { VisualPreviewSection } from "@/components/visual-preview-section"
+import { DopamineCard } from "@/components/dopamine-card"
 import { FeaturesSection } from "@/components/features-section"
 import { HowItWorksSection } from "@/components/how-it-works-section"
 import { PricingSection } from "@/components/pricing-section"
@@ -17,8 +17,9 @@ export default function Page() {
         <Navigation />
         <HeroSection />
         <StatsSection />
-        <VisualPreviewSection />
+        <DopamineCard />
         <HowItWorksSection />
+
         <FeaturesSection />
         <PricingSection />
         <ReviewsSection />

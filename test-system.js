@@ -59,7 +59,8 @@ async function testEnvironmentVariables() {
   const criticalVars = {
     'XAI_API_KEY': process.env.XAI_API_KEY,
     'SUPABASE_URL': process.env.SUPABASE_URL,
-    'SUPABASE_KEY': process.env.SUPABASE_KEY
+    // Prefer service key for backend with RLS; fall back to anon
+    'SUPABASE_SERVICE_KEY_or_SUPABASE_KEY': process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY
   };
 
   // Optional variables
@@ -185,7 +186,9 @@ async function testSupabaseConnection() {
   log('TEST 3: SUPABASE DATABASE CONNECTION', 'blue');
   log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n', 'blue');
 
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
+
+  if (!process.env.SUPABASE_URL || !supabaseKey) {
     logError('Supabase credentials not set - skipping test');
     results.failed++;
     return false;
@@ -199,8 +202,8 @@ async function testSupabaseConnection() {
       path: url.pathname + '?limit=1',
       method: 'GET',
       headers: {
-        'apikey': process.env.SUPABASE_KEY,
-        'Authorization': `Bearer ${process.env.SUPABASE_KEY}`,
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
       }
     };
 

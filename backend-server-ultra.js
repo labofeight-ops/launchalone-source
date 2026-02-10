@@ -7,9 +7,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Use service role key so the backend can bypass Supabase RLS policies.
+// Falls back to public anon key for local demos, but writes will fail if RLS is on.
 const supabase = createClient(
   process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_KEY || ''
+  process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY || '',
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
 );
 
 // ============================================================================
@@ -667,10 +675,15 @@ Requirements:
 Niche: ${user.niche}`;
     }
     
-    // Add blueprint if specified
-    if (blueprint && blueprint !== 'None (Launchalone decides)') {
-      prompt += `\n\nUse this proven structure: ${blueprint}`;
-    }
+  // Add blueprint if specified
+  if (blueprint && blueprint !== 'None (Launchalone decides)') {
+    prompt += `\n\nUse this proven structure: ${blueprint}`;
+  }
+
+  // Short-circuit when contentType unsupported
+  if (!['Thread (5-10 posts)', 'Reply', 'Single Post'].includes(contentType)) {
+    return res.status(400).json({ error: 'Unsupported contentType' });
+  }
     
     // Generate with Grok
     const result = await generateWithGrok(prompt, {
@@ -855,9 +868,11 @@ app.get('/api/account/health', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+const HOST = process.env.HOST || '127.0.0.1';
+app.listen(PORT, HOST, () => {
   console.log('\n🔥 LAUNCHALONE ULTRA GROWTH ENGINE 🔥\n');
   console.log(`✅ Server running on port ${PORT}`);
+  console.log(`✅ Host: ${HOST}`);
   console.log(`✅ XAI Grok integration: ${process.env.XAI_API_KEY ? 'ACTIVE' : 'MISSING KEY'}`);
   console.log(`✅ Supabase connection: ${process.env.SUPABASE_URL ? 'ACTIVE' : 'MISSING URL'}`);
   console.log('\n🚀 Secret Sauce Loaded:');

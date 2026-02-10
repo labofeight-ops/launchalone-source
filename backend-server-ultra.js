@@ -3,14 +3,39 @@ const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+function createApiApp() {
+  const app = express();
+  app.use(cors());
+  app.use(express.json());
 
-const supabase = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_KEY || ''
-);
+  // Root hint route (helps when users hit the API directly)
+  app.get('/', (_req, res) => {
+    res.json({
+      status: 'online',
+      message: 'LaunchAlone backend alive. Try GET /api/health',
+      api: '/api/*'
+    });
+  });
+
+  // Prefer service role key (needed with RLS); fail fast if missing
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('Missing Supabase configuration. Set SUPABASE_URL and SUPABASE_SERVICE_KEY (or SUPABASE_KEY).');
+    process.exit(1);
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+
+  if (!process.env.XAI_API_KEY) {
+    console.warn('Warning: XAI_API_KEY is not set. Content generation endpoints will fail.');
+  }
 
 // ============================================================================
 // 🔥 ULTRA SECRET SAUCE #1: NEURAL HUMANIZATION ENGINE
@@ -630,6 +655,12 @@ app.post('/api/content/generate', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     
+    // Validate content type
+    const supportedTypes = ['Thread (5-10 posts)', 'Reply', 'Single Post'];
+    if (!supportedTypes.includes(contentType)) {
+      return res.status(400).json({ error: 'Unsupported contentType' });
+    }
+    
     // Build context-aware prompt
     let prompt = '';
     
@@ -854,17 +885,28 @@ app.get('/api/account/health', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log('\n🔥 LAUNCHALONE ULTRA GROWTH ENGINE 🔥\n');
-  console.log(`✅ Server running on port ${PORT}`);
-  console.log(`✅ XAI Grok integration: ${process.env.XAI_API_KEY ? 'ACTIVE' : 'MISSING KEY'}`);
-  console.log(`✅ Supabase connection: ${process.env.SUPABASE_URL ? 'ACTIVE' : 'MISSING URL'}`);
-  console.log('\n🚀 Secret Sauce Loaded:');
-  console.log('   → Neural Humanization Engine');
-  console.log('   → 2026 Algorithm Decoder');
-  console.log('   → Reply Sniper System');
-  console.log('   → First 45 Minute Stack');
-  console.log('   → Voiceprint Analyzer');
-  console.log('\n💰 Combined Value: $500K+ in proprietary systems\n');
-});
+  return app;
+}
+
+const apiApp = createApiApp();
+
+if (require.main === module) {
+  const PORT = process.env.PORT || 3001;
+  const HOST = process.env.HOST || '0.0.0.0';
+  apiApp.listen(PORT, HOST, () => {
+    console.log('\n🔥 LAUNCHALONE ULTRA GROWTH ENGINE 🔥\n');
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`✅ Host: ${HOST}`);
+    console.log(`✅ XAI Grok integration: ${process.env.XAI_API_KEY ? 'ACTIVE' : 'MISSING KEY'}`);
+    console.log(`✅ Supabase connection: ${process.env.SUPABASE_URL ? 'ACTIVE' : 'MISSING URL'}`);
+    console.log('\n🚀 Secret Sauce Loaded:');
+    console.log('   → Neural Humanization Engine');
+    console.log('   → 2026 Algorithm Decoder');
+    console.log('   → Reply Sniper System');
+    console.log('   → First 45 Minute Stack');
+    console.log('   → Voiceprint Analyzer');
+    console.log('\n💰 Combined Value: $500K+ in proprietary systems\n');
+  });
+}
+
+module.exports = { app: apiApp, createApiApp };

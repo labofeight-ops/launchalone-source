@@ -1,29 +1,23 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { IBM_Plex_Sans, IBM_Plex_Mono, Bebas_Neue } from "next/font/google"
+import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-const ibmPlexSans = IBM_Plex_Sans({
-  weight: ["400", "500", "600", "700"],
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-ibm-plex-sans",
+  variable: "--font-inter",
+  display: "swap",
 })
-const ibmPlexMono = IBM_Plex_Mono({
-  weight: ["400", "500"],
-  subsets: ["latin"],
-  variable: "--font-ibm-plex-mono",
-})
-const bebasNeue = Bebas_Neue({ weight: "400", subsets: ["latin"], variable: "--font-bebas" })
 
 export const metadata: Metadata = {
-  title: "Launchalone | X Growth, Done Right",
+  title: "LaunchAlone | Safe AI Growth for X",
   description:
-    "Launchalone is built for X growth for personal and business brands. Built on 2026 ranking signals. Set up in under 5 minutes.",
+    "Generate viral X content with AI. Review it. Post it manually. Zero automation = Zero bans. 100% X-compliant growth platform.",
   openGraph: {
-    title: "Launchalone | X Growth, Done Right",
+    title: "LaunchAlone | Safe AI Growth for X",
     description:
-      "Launchalone is built for X growth for personal and business brands. Built on 2026 ranking signals. Set up in under 5 minutes.",
+      "Generate viral X content with AI. Review it. Post it manually. Zero automation = Zero bans.",
     type: "website",
   },
 }
@@ -34,9 +28,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark bg-background">
+    <html lang="en" className="dark">
       <body
-        className={`${ibmPlexSans.variable} ${bebasNeue.variable} ${ibmPlexMono.variable} font-sans antialiased overflow-x-hidden`}
+        className={`${inter.variable} font-sans antialiased bg-background text-foreground`}
       >
         <div className="noise-overlay" aria-hidden="true" />
         {children}

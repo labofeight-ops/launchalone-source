@@ -2,10 +2,10 @@
   "name": "launchalone-backend",
   "version": "2.0.0",
   "description": "LaunchAlone Ultra - X Growth Platform Backend",
-  "main": "backend-server-ultra.js",
+  "main": "server-combined.js",
   "scripts": {
-    "start": "node backend-server-ultra.js",
-    "dev": "nodemon backend-server-ultra.js",
+    "start": "node server-combined.js",
+    "dev": "NODE_ENV=development node server-combined.js",
     "legacy": "node backend-server-complete.js",
     "test": "node test-system.js",
     "health": "node test-system.js"

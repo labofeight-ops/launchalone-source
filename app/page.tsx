@@ -1,21 +1,24 @@
-export default function Home() {
+import { Navigation } from "@/components/navigation"
+import { HeroSection } from "@/components/hero-section"
+import { StatsSection } from "@/components/stats-section"
+import { FeaturesSection } from "@/components/features-section"
+import { HowItWorksSection } from "@/components/how-it-works-section"
+import { PricingSection } from "@/components/pricing-section"
+import { FooterSection } from "@/components/footer-section"
+
+export default function Page() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="text-center">
-        <h1 className="text-6xl font-bold mb-4">
-          Welcome to <span className="text-blue-600">LaunchAlone</span>
-        </h1>
-        <p className="text-xl text-gray-600 mb-8">
-          Your Growth Engine Landing Page
-        </p>
-        <div className="flex gap-4 justify-center">
-          <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
-            Get Started
-          </button>
-          <button className="border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-50 transition">
-            Learn More
-          </button>
-        </div>
+    <main className="relative min-h-screen">
+      <div className="grid-bg fixed inset-0 opacity-30" aria-hidden="true" />
+
+      <div className="relative z-10">
+        <Navigation />
+        <HeroSection />
+        <StatsSection />
+        <FeaturesSection />
+        <HowItWorksSection />
+        <PricingSection />
+        <FooterSection />
       </div>
     </main>
   )

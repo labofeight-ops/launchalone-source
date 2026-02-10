@@ -3,6 +3,7 @@ import { HeroSection } from "@/components/hero-section"
 import { StatsSection } from "@/components/stats-section"
 import { FeaturesSection } from "@/components/features-section"
 import { HowItWorksSection } from "@/components/how-it-works-section"
+import { ReviewsSection } from "@/components/reviews-section"
 import { PricingSection } from "@/components/pricing-section"
 import { FooterSection } from "@/components/footer-section"
 
@@ -15,8 +16,9 @@ export default function Page() {
         <Navigation />
         <HeroSection />
         <StatsSection />
-        <FeaturesSection />
         <HowItWorksSection />
+        <FeaturesSection />
+        <ReviewsSection />
         <PricingSection />
         <FooterSection />
       </div>

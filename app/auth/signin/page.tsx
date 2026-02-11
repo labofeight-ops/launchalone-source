@@ -1,105 +1,75 @@
 "use client"
 
 import { useState } from "react"
-import { Twitter } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { ArrowRight } from "lucide-react"
+
+// Modern X logo (2026 style)
+const XLogo = () => (
+  <svg viewBox="0 0 24 24" className="w-full h-full" fill="currentColor">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+  </svg>
+)
 
 export default function SignInPage() {
-  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleXLogin = async () => {
     setIsLoading(true)
     
-    // TODO: Replace with actual X OAuth flow
-    // For now, simulate the flow
-    
-    // Real implementation would be:
-    // const response = await fetch('/api/auth/twitter/redirect')
-    // const { url } = await response.json()
-    // window.location.href = url
-    
-    // Simulated for now - replace this entire function
+    // Simulate auth
     setTimeout(() => {
-      // Simulate successful auth
       localStorage.setItem('launchalone_authed', 'true')
-      localStorage.setItem('launchalone_user', JSON.stringify({
-        id: 'user_' + Date.now(),
-        handle: '@demo_user',
-        name: 'Demo User',
-        avatar: '',
-        followers: 1250
-      }))
-      router.push('/onboarding')
+      window.location.href = '/onboarding'
     }, 1500)
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center p-4 sm:p-6">
+    <div className="min-h-screen bg-black text-white flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8 sm:mb-12">
-          <div className="font-['Bebas_Neue'] text-4xl sm:text-5xl tracking-wider text-[#00ff88] mb-3 sm:mb-4">
-            LAUNCHALONE
+          <div className="text-4xl sm:text-5xl font-bold tracking-tight mb-3 sm:mb-4">
+            LaunchAlone
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3">Welcome Back</h1>
-          <p className="text-sm sm:text-base text-gray-400">
-            Sign in with your X account to continue
+          <p className="text-sm sm:text-base text-white/70">
+            Sign in with X to continue
           </p>
         </div>
 
-        <div className="bg-[#111] border border-[#222] rounded-2xl p-6 sm:p-8">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 sm:p-8">
           <button
             onClick={handleXLogin}
             disabled={isLoading}
-            className="w-full bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed text-base sm:text-lg"
+            className="w-full bg-white hover:bg-white/90 text-black font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed text-base sm:text-lg"
           >
             {isLoading ? (
               <>
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                 Connecting...
               </>
             ) : (
               <>
-                <Twitter className="w-5 h-5 sm:w-6 sm:h-6" />
+                <div className="w-6 h-6">
+                  <XLogo />
+                </div>
                 Continue with X
               </>
             )}
           </button>
 
           <div className="mt-6 text-center">
-            <p className="text-xs sm:text-sm text-gray-500">
+            <p className="text-xs sm:text-sm text-white/50">
               By continuing, you agree to our Terms of Service and Privacy Policy
             </p>
           </div>
         </div>
 
         <div className="mt-6 sm:mt-8 text-center">
-          <p className="text-xs sm:text-sm text-gray-500">
+          <p className="text-xs sm:text-sm text-white/50">
             New to LaunchAlone?{" "}
-            <a href="/" className="text-[#00ff88] hover:text-[#00cc66] transition-colors">
+            <a href="/" className="text-white hover:text-white/80 transition-colors">
               Learn more
             </a>
-          </p>
-        </div>
-
-        {/* Instructions for real implementation */}
-        <div className="mt-8 sm:mt-12 p-4 sm:p-6 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
-          <p className="text-xs sm:text-sm text-yellow-200 font-mono">
-            <strong>TODO:</strong> Replace handleXLogin with real X OAuth flow.
-            <br /><br />
-            1. Create X app at developer.twitter.com
-            <br />
-            2. Get OAuth 2.0 credentials
-            <br />
-            3. Add to .env.local:
-            <br />
-            - TWITTER_CLIENT_ID
-            <br />
-            - TWITTER_CLIENT_SECRET
-            <br />
-            - TWITTER_REDIRECT_URI
-            <br /><br />
-            4. Create /api/auth/twitter/redirect and /api/auth/twitter/callback
           </p>
         </div>
       </div>

@@ -5,551 +5,556 @@ import {
   BarChart3, Zap, TrendingUp, MessageCircle, Calendar, Sparkles, Target, 
   LogOut, MoreHorizontal, ArrowRight, Activity, Shield, Eye, Flame,
   Clock, Copy, Send, User, Settings, RefreshCw, CheckCircle, AlertCircle,
-  Edit, X as XIcon, Users, Wrench, Layers, BookOpen
+  Edit, Users, Heart, Repeat2, Search, Filter, ChevronDown, ChevronUp,
+  ExternalLink, BookOpen, Layers, Wrench, Plus, TrendingDown
 } from "lucide-react"
-import { analyzeTweetVirality, generateTweetWithContext, VIRAL_HOOKS, ENGAGEMENT_BAIT_TACTICS } from "@/lib/viral-engine"
-import { scoreReplyOpportunity, generateStrategicReply, unfoldThread, predictOptimalTimes, GROWTH_ACCELERATORS, analyzeVoicePatterns } from "@/lib/growth-engine"
+import { analyzeTweetVirality, generateTweetWithContext, VIRAL_HOOKS } from "@/lib/viral-engine"
+import { scoreReplyOpportunity, generateStrategicReply, unfoldThread, GROWTH_ACCELERATORS } from "@/lib/growth-engine"
+
+// 2026 X Logo
+const XLogo = ({ className = "w-5 h-5" }) => (
+  <svg viewBox="0 0 24 24" className={className} fill="currentColor">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+  </svg>
+)
 
 type TimeRange = "7D" | "30D" | "90D"
-type TabType = "overview" | "create" | "hooks" | "replies" | "threads" | "voice" | "tactics" | "schedule" | "profile"
 
-const METRICS: Record<TimeRange, any[]> = {
+const METRICS = {
   "7D": [
-    { label: "Followers", value: "+312", change: "+18%", trend: "up" },
-    { label: "Impressions", value: "148K", change: "+22%", trend: "up" },
-    { label: "Engagement", value: "3.9%", change: "+0.8%", trend: "up" },
-    { label: "Profile Clicks", value: "1.2K", change: "+15%", trend: "up" },
+    { label: "Followers", value: "+312", change: "+18%", prev: "1,733", trend: "up" },
+    { label: "Impressions", value: "148K", change: "+22%", prev: "121K", trend: "up" },
+    { label: "Engagement", value: "3.9%", change: "+0.8%", prev: "3.1%", trend: "up" },
+    { label: "Profile Visits", value: "1.2K", change: "+15%", prev: "1.0K", trend: "up" },
   ],
   "30D": [
-    { label: "Followers", value: "+1,082", change: "+34%", trend: "up" },
-    { label: "Impressions", value: "612K", change: "+41%", trend: "up" },
-    { label: "Engagement", value: "3.4%", change: "+0.6%", trend: "up" },
-    { label: "Profile Clicks", value: "4.8K", change: "+24%", trend: "up" },
+    { label: "Followers", value: "+1,082", change: "+34%", prev: "3,197", trend: "up" },
+    { label: "Impressions", value: "612K", change: "+41%", prev: "434K", trend: "up" },
+    { label: "Engagement", value: "3.4%", change: "+0.6%", prev: "2.8%", trend: "up" },
+    { label: "Profile Visits", value: "4.8K", change: "+24%", prev: "3.9K", trend: "up" },
   ],
   "90D": [
-    { label: "Followers", value: "+3,247", change: "+61%", trend: "up" },
-    { label: "Impressions", value: "1.8M", change: "+74%", trend: "up" },
-    { label: "Engagement", value: "3.1%", change: "+0.4%", trend: "up" },
-    { label: "Profile Clicks", value: "12.4K", change: "+38%", trend: "up" },
+    { label: "Followers", value: "+3,247", change: "+61%", prev: "5,317", trend: "up" },
+    { label: "Impressions", value: "1.8M", change: "+74%", prev: "1.0M", trend: "up" },
+    { label: "Engagement", value: "3.1%", change: "+0.4%", prev: "2.7%", trend: "up" },
+    { label: "Profile Visits", value: "12.4K", change: "+38%", prev: "9.0K", trend: "up" },
   ],
 }
 
+const VIRAL_FEED = [
+  {
+    id: "1",
+    author: "Sarah Chen",
+    handle: "@sarahbuilds",
+    avatar: "SC",
+    content: "Finally hit 10K followers after 8 months of consistent posting. Biggest lesson: reply strategy > standalone posts. Engagement compounds faster than you think.",
+    impressions: 342000,
+    likes: 2847,
+    retweets: 456,
+    replies: 234,
+    time: "2h ago",
+    score: 94,
+    category: "growth"
+  },
+  {
+    id: "2",
+    author: "Alex Hormozi",
+    handle: "@AlexHormozi",
+    avatar: "AH",
+    content: "Built $100M portfolio. The pattern: solve a $10K problem for 10 people, then a $1K problem for 100, then a $100 problem for 1000. Scale the economics, not the product first.",
+    impressions: 891000,
+    likes: 8234,
+    retweets: 2105,
+    replies: 567,
+    time: "3h ago",
+    score: 98,
+    category: "business"
+  },
+  {
+    id: "3",
+    author: "Emma Rodriguez",
+    handle: "@emmabuilds",
+    avatar: "ER",
+    content: "Spent 6 months building my product in stealth. Launched yesterday. 0 sales. The 'build it and they will come' myth is painfully real. Build the audience WHILE building.",
+    impressions: 234000,
+    likes: 3421,
+    retweets: 678,
+    replies: 521,
+    time: "5h ago",
+    score: 91,
+    category: "startup"
+  },
+  {
+    id: "4",
+    author: "David Park",
+    handle: "@davidonx",
+    avatar: "DP",
+    content: "Unpopular opinion: Morning routines are overrated. I've had my best years waking up at random times and just getting to work. Productivity ≠ ritual.",
+    impressions: 156000,
+    likes: 1834,
+    retweets: 312,
+    replies: 189,
+    time: "7h ago",
+    score: 88,
+    category: "productivity"
+  },
+  {
+    id: "5",
+    author: "Lisa Wang",
+    handle: "@lisagrows",
+    avatar: "LW",
+    content: "Revenue: $0 → $50K MRR in 90 days. The strategy: 1) Build in public 2) Reply to 50 posts daily 3) DM every engaged follower 4) Turn conversations into customers. Simple, not easy.",
+    impressions: 445000,
+    likes: 4532,
+    retweets: 892,
+    replies: 334,
+    time: "9h ago",
+    score: 95,
+    category: "growth"
+  },
+]
+
+const REPLY_OPPORTUNITIES = [
+  {
+    id: "1",
+    author: "Mike Johnson",
+    handle: "@mikegrows",
+    avatar: "MJ",
+    content: "My X engagement dropped from 5% to 1.2%. I'm posting daily, using hashtags, posting at 'optimal times'. What am I missing?",
+    impressions: 45000,
+    likes: 234,
+    replies: 67,
+    time: "45m ago",
+    score: 89,
+    velocity: 5.2,
+    suggestedReply: "Had the exact same problem. Here's what fixed it: 1) Stop using hashtags (they kill reach on X) 2) Post 30% less, reply 300% more 3) End every post with a question. My engagement went from 1.1% to 4.2% in 45 days.",
+    reasoning: "High engagement potential, asking for help, you have authority to answer"
+  },
+  {
+    id: "2",
+    author: "Rachel Green",
+    handle: "@rachelcreates",
+    avatar: "RG",
+    content: "Anyone else struggling to get consistent impressions? One post hits 50K, next one gets 2K. What's the algorithm doing?",
+    impressions: 28000,
+    likes: 189,
+    replies: 43,
+    time: "1h ago",
+    score: 86,
+    velocity: 3.1,
+    suggestedReply: "The pattern I found: X algorithm rewards reply activity more than posting. Your 50K post probably sparked replies. Your 2K post didn't. End with questions, reply to your own thread, engage in comments. Consistency in engagement > consistency in posting.",
+    reasoning: "Relatable problem, good engagement velocity, opportunity to share framework"
+  },
+  {
+    id: "3",
+    author: "Tom Anderson",
+    handle: "@tomanderz",
+    avatar: "TA",
+    content: "Looking for the best X analytics tool. Tried Buffer, Hypefury, Taplio. None show me what I actually need. Recommendations?",
+    impressions: 18000,
+    likes: 145,
+    replies: 89,
+    time: "2h ago",
+    score: 84,
+    velocity: 2.4,
+    suggestedReply: "Tried them all. Best 'tool' is a simple spreadsheet. Track 3 metrics weekly: 1) Reply rate (replies/impressions), 2) Click rate, 3) Follower velocity. Takes 5 min/week. More actionable than any $50/mo tool.",
+    reasoning: "Asking for tool recs, you can provide contrarian value, good reply positioning"
+  },
+  {
+    id: "4",
+    author: "Nina Patel",
+    handle: "@ninaonx",
+    avatar: "NP",
+    content: "Been on X for 3 months. 200 followers. Posting daily. Feels like shouting into the void. How long before it clicks?",
+    impressions: 12000,
+    likes: 234,
+    replies: 156,
+    time: "3h ago",
+    score: 87,
+    velocity: 1.3,
+    suggestedReply: "I felt this at 3 months. What changed: stopped posting daily, started replying to 20-30 posts daily in my niche. Within 30 days, went from 200 to 1.2K. The algorithm rewards engagement more than content. Reply first, post second.",
+    reasoning: "Beginner asking for help, highly engaged replies, you can provide hope + tactics"
+  },
+]
+
+const TOP_POSTS = [
+  { content: "The reply habit that added 300 followers in 7 days", impressions: "42K", engagement: "4.2%", date: "2 days ago" },
+  { content: "Simple framework to turn views into profile clicks", impressions: "31K", engagement: "3.8%", date: "4 days ago" },
+  { content: "What I learned after 100 customer calls", impressions: "28K", engagement: "4.1%", date: "6 days ago" },
+  { content: "The biggest X growth mistake (and how to fix it)", impressions: "24K", engagement: "3.5%", date: "1 week ago" },
+]
+
+const SCHEDULED_POSTS = [
+  { content: "The reply strategy that 10x'd my reach", time: "Today, 6:00 PM", status: "scheduled" },
+  { content: "Most people think X growth is about posting...", time: "Tomorrow, 12:00 PM", status: "scheduled" },
+  { content: "Here's what 90 days of consistent replies taught me", time: "Tomorrow, 5:00 PM", status: "scheduled" },
+]
+
 export default function DashboardPage() {
   const [timeRange, setTimeRange] = useState<TimeRange>("30D")
-  const [activeTab, setActiveTab] = useState<TabType>("create")
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  
-  // AI Credits
   const [aiCredits, setAiCredits] = useState({ used: 23, total: 100, resetIn: "11h 23m" })
-  
-  // Content Creation
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [expandedPost, setExpandedPost] = useState<string | null>(null)
+  const [showQuickCreate, setShowQuickCreate] = useState(false)
   const [topic, setTopic] = useState("")
   const [generatedDrafts, setGeneratedDrafts] = useState<string[]>([])
   const [selectedDraft, setSelectedDraft] = useState(0)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [editedContent, setEditedContent] = useState("")
   const [analysis, setAnalysis] = useState<any>(null)
-  
-  // Thread Unfolder
-  const [longContent, setLongContent] = useState("")
-  const [unfoldedThread, setUnfoldedThread] = useState<string[]>([])
-  
-  // Context
-  const [context, setContext] = useState<any>(null)
-
-  useEffect(() => {
-    const saved = localStorage.getItem("launchalone_context")
-    if (saved) setContext(JSON.parse(saved))
-  }, [])
 
   const metrics = METRICS[timeRange]
   const creditPercentage = (aiCredits.used / aiCredits.total) * 100
-  const currentDraft = editedContent || generatedDrafts[selectedDraft] || ""
 
   const handleGenerate = async () => {
-    if (aiCredits.used >= aiCredits.total) {
-      alert("Daily AI credits exhausted! Resets in " + aiCredits.resetIn)
-      return
-    }
-
+    if (aiCredits.used >= aiCredits.total) return
     setIsGenerating(true)
-    await new Promise(resolve => setTimeout(resolve, 1500))
-
-    if (context) {
-      const drafts = generateTweetWithContext(context, topic)
-      const enhancedDrafts = drafts.map(draft => {
-        const baitCategory = Object.keys(ENGAGEMENT_BAIT_TACTICS)[Math.floor(Math.random() * 4)]
-        const baits = ENGAGEMENT_BAIT_TACTICS[baitCategory as keyof typeof ENGAGEMENT_BAIT_TACTICS]
-        const bait = baits[Math.floor(Math.random() * baits.length)]
-        return `${draft}\n\n${bait}`
-      })
-      
-      setGeneratedDrafts(enhancedDrafts)
-      setSelectedDraft(0)
-      setEditedContent("")
-      const firstAnalysis = analyzeTweetVirality(enhancedDrafts[0])
-      setAnalysis(firstAnalysis)
-    } else {
-      setGeneratedDrafts([
-        `${topic || "Your topic here"}\n\nHere's what I learned:\n\n1. [Lesson 1]\n2. [Lesson 2]\n3. [Lesson 3]\n\nWhat would you add?`,
-        `Everyone says ${topic || "this"}. That's wrong.\n\nHere's what actually works:\n\n[Your insight]\n\nAgree or disagree?`,
-        `I spent 2 years figuring out ${topic || "this"}.\n\nHere's the simple framework:\n\n[Step 1]\n[Step 2]\n[Step 3]\n\nWhat's your experience?`
-      ])
-      setSelectedDraft(0)
-    }
+    await new Promise(resolve => setTimeout(resolve, 1000))
     
+    const drafts = [
+      `${topic || "Your topic"}\n\nHere's what I learned:\n\n• Point 1\n• Point 2\n• Point 3\n\nWhat would you add?`,
+      `Everyone says ${topic || "this"}. Wrong.\n\nWhat actually works:\n\n[Insight]\n\nAgree?`,
+      `Spent 2 years on ${topic || "this"}.\n\nSimple framework:\n\n1. Step 1\n2. Step 2\n3. Step 3`
+    ]
+    
+    setGeneratedDrafts(drafts)
+    setSelectedDraft(0)
+    setAnalysis(analyzeTweetVirality(drafts[0]))
     setAiCredits(prev => ({ ...prev, used: prev.used + 1 }))
     setIsGenerating(false)
   }
 
-  useEffect(() => {
-    if (currentDraft) {
-      const newAnalysis = analyzeTweetVirality(currentDraft)
-      setAnalysis(newAnalysis)
-    }
-  }, [currentDraft, selectedDraft])
-
-  const handleUnfold = () => {
-    if (longContent.trim()) {
-      const thread = unfoldThread(longContent)
-      setUnfoldedThread(thread)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-black text-white font-sans">
-      {/* Sidebar */}
-      <aside className={`fixed top-0 left-0 h-screen bg-black border-r border-white/10 transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-20'} z-50`}>
-        <div className="p-6 border-b border-white/10">
-          <div className="flex items-center justify-between">
-            {sidebarOpen && (
-              <div className="text-2xl font-bold tracking-tight">LaunchAlone</div>
-            )}
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-white/5 rounded transition-colors"
-            >
-              <MoreHorizontal className="w-5 h-5" />
-            </button>
-          </div>
+      {/* Compact Sidebar */}
+      <aside className={`fixed top-0 left-0 h-screen bg-black border-r border-white/10 transition-all duration-300 ${sidebarOpen ? 'w-56' : 'w-16'} z-50`}>
+        <div className="p-4 border-b border-white/10 flex items-center justify-between">
+          {sidebarOpen && <div className="text-lg font-bold">LaunchAlone</div>}
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 hover:bg-white/5 rounded">
+            <MoreHorizontal className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* AI Credits Bar */}
         {sidebarOpen && (
-          <div className="px-4 py-6 border-b border-white/10">
-            <div className="mb-2 flex items-center justify-between text-xs">
-              <span className="uppercase tracking-wider text-white/50">AI Credits</span>
-              <span className="text-white">{aiCredits.total - aiCredits.used}/{aiCredits.total}</span>
+          <div className="px-3 py-3 border-b border-white/10">
+            <div className="mb-1.5 flex items-center justify-between text-xs">
+              <span className="text-white/50">AI Credits</span>
+              <span className="font-bold">{aiCredits.total - aiCredits.used}/{aiCredits.total}</span>
             </div>
-            <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-white transition-all duration-300"
-                style={{ width: `${100 - creditPercentage}%` }}
-              />
+            <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full bg-white transition-all" style={{ width: `${100 - creditPercentage}%` }} />
             </div>
-            <div className="mt-2 text-xs text-white/50">
-              Resets in {aiCredits.resetIn}
-            </div>
+            <div className="mt-1 text-[10px] text-white/50">Resets {aiCredits.resetIn}</div>
           </div>
         )}
 
-        <nav className="p-4 space-y-1">
-          {[
-            { id: "overview", icon: BarChart3, label: "Overview" },
-            { id: "create", icon: Sparkles, label: "AI Content" },
-            { id: "hooks", icon: BookOpen, label: "Viral Hooks" },
-            { id: "replies", icon: MessageCircle, label: "Reply Finder" },
-            { id: "threads", icon: Layers, label: "Thread Unfolder" },
-            { id: "voice", icon: User, label: "Voice Clone" },
-            { id: "tactics", icon: Wrench, label: "Growth Tactics" },
-            { id: "schedule", icon: Calendar, label: "Schedule" },
-            { id: "profile", icon: Target, label: "Profile" },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id as TabType)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                activeTab === item.id
-                  ? 'bg-white text-black'
-                  : 'text-white/70 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <item.icon className="w-5 h-5" />
-              {sidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
-            </button>
-          ))}
-        </nav>
-
-        {sidebarOpen && (
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold">
-                P
+        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-white/10">
+          {sidebarOpen && (
+            <>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">P</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-bold truncate">@pedro</div>
+                  <div className="text-[10px] text-white/50">Pro Plan</div>
+                </div>
               </div>
-              <div className="flex-1">
-                <div className="text-sm font-bold">@pedro</div>
-                <div className="text-xs text-white/50">Pro Plan</div>
-              </div>
-            </div>
-            <a href="/settings" className="w-full flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white transition-colors mb-2">
-              <Settings className="w-4 h-4" />
-              <span className="text-xs">Settings</span>
-            </a>
-            <button className="w-full flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white transition-colors">
-              <LogOut className="w-4 h-4" />
-              <span className="text-xs">Sign Out</span>
-            </button>
-          </div>
-        )}
+              <a href="/settings" className="w-full flex items-center gap-2 px-2 py-1.5 text-white/70 hover:text-white text-xs rounded hover:bg-white/5">
+                <Settings className="w-3.5 h-3.5" />Settings
+              </a>
+            </>
+          )}
+        </div>
       </aside>
 
-      {/* Main Content */}
-      <main className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
-        {/* Header */}
-        <header className="sticky top-0 bg-black/80 backdrop-blur-xl border-b border-white/10 p-4 sm:p-6 z-40">
+      {/* Main Dashboard - DENSE LAYOUT */}
+      <main className={`transition-all duration-300 ${sidebarOpen ? 'ml-56' : 'ml-16'}`}>
+        
+        {/* Compact Header */}
+        <header className="sticky top-0 bg-black/95 backdrop-blur-xl border-b border-white/10 px-4 py-3 z-40">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-1">
-                {activeTab === "overview" && "Dashboard Overview"}
-                {activeTab === "create" && "AI Content Studio"}
-                {activeTab === "hooks" && "Viral Hooks Library"}
-                {activeTab === "replies" && "Reply Finder"}
-                {activeTab === "threads" && "Thread Unfolder"}
-                {activeTab === "voice" && "Voice Cloning"}
-                {activeTab === "tactics" && "Growth Accelerators"}
-                {activeTab === "schedule" && "Post Schedule"}
-                {activeTab === "profile" && "Profile Review"}
-              </h1>
-              <p className="text-xs sm:text-sm text-white/50">
-                {activeTab === "create" && "AI-powered content with viral scoring"}
-                {activeTab === "hooks" && "500+ proven viral hooks"}
-                {activeTab === "replies" && "Find high-impact reply opportunities"}
-                {activeTab === "threads" && "Auto-create viral threads"}
-                {activeTab === "voice" && "Match your authentic writing style"}
-                {activeTab === "tactics" && "Specific strategies that 10x reach"}
-              </p>
+            <div className="flex items-center gap-3">
+              <XLogo className="w-5 h-5" />
+              <h1 className="text-lg font-bold">Dashboard</h1>
             </div>
-
-            {activeTab === "overview" && (
-              <div className="hidden sm:flex gap-2 bg-white/5 p-1 rounded-lg border border-white/10">
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1 bg-white/5 p-0.5 rounded-lg border border-white/10">
                 {(["7D", "30D", "90D"] as TimeRange[]).map((range) => (
                   <button
                     key={range}
                     onClick={() => setTimeRange(range)}
-                    className={`px-3 sm:px-4 py-2 text-xs uppercase tracking-wider rounded transition-all ${
-                      timeRange === range
-                        ? 'bg-white text-black font-bold'
-                        : 'text-white/70 hover:text-white'
+                    className={`px-2.5 py-1 text-[11px] uppercase tracking-wider rounded transition-all ${
+                      timeRange === range ? 'bg-white text-black font-bold' : 'text-white/70 hover:text-white'
                     }`}
                   >
                     {range}
                   </button>
                 ))}
               </div>
-            )}
+              <button 
+                onClick={() => setShowQuickCreate(!showQuickCreate)}
+                className="px-3 py-1.5 bg-white text-black rounded-lg text-xs font-bold hover:bg-white/90 flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Create
+              </button>
+            </div>
           </div>
         </header>
 
-        {/* Content Area */}
-        <div className="p-4 sm:p-6 max-w-7xl mx-auto pb-24">
+        <div className="p-4 space-y-4">
           
-          {/* OVERVIEW TAB */}
-          {activeTab === "overview" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {metrics.map((metric, i) => (
-                  <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 sm:p-6 hover:border-white/20 transition-all">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="text-xs uppercase tracking-wider text-white/50">{metric.label}</div>
-                      <TrendingUp className="w-4 h-4 text-white" />
-                    </div>
-                    <div className="text-3xl sm:text-4xl font-bold tracking-tight mb-2">{metric.value}</div>
-                    <div className="text-sm text-white/70 flex items-center gap-1">
-                      <ArrowRight className="w-3 h-3" />
-                      {metric.change}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* AI CONTENT STUDIO TAB */}
-          {activeTab === "create" && (
-            <div className="space-y-6">
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6">
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <div>
-                    <h2 className="text-lg sm:text-xl font-bold tracking-tight">Generate Content</h2>
-                    <p className="text-xs sm:text-sm text-white/50">AI trained on 10M+ viral tweets</p>
-                  </div>
-                  {!context && (
-                    <a href="/settings" className="text-xs text-white/70 hover:text-white transition-colors">
-                      Set up context →
-                    </a>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider text-white/50 mb-2">
-                      Topic / What do you want to talk about?
-                    </label>
-                    <input
-                      type="text"
-                      value={topic}
-                      onChange={(e) => setTopic(e.target.value)}
-                      placeholder="e.g., my startup journey, productivity tips, X growth"
-                      className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-sm focus:border-white/30 focus:outline-none transition-colors"
-                    />
-                  </div>
-
-                  <button
-                    onClick={handleGenerate}
-                    disabled={isGenerating || aiCredits.used >= aiCredits.total}
-                    className="w-full bg-white text-black px-6 py-3 rounded-lg font-bold hover:bg-white/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-5 h-5" />
-                        Generate ({aiCredits.total - aiCredits.used} credits left)
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {generatedDrafts.length > 0 && (
-                <div className="grid lg:grid-cols-2 gap-6">
-                  <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6">
-                    <h3 className="text-lg font-bold tracking-tight mb-4">Draft Variations</h3>
-                    <div className="space-y-3 mb-4">
-                      {generatedDrafts.map((draft, i) => (
-                        <button
-                          key={i}
-                          onClick={() => {
-                            setSelectedDraft(i)
-                            setEditedContent("")
-                          }}
-                          className={`w-full text-left p-3 sm:p-4 rounded-lg border transition-all ${
-                            selectedDraft === i
-                              ? 'border-white bg-white/10'
-                              : 'border-white/10 bg-black hover:border-white/20'
-                          }`}
-                        >
-                          <div className="text-xs text-white/50 mb-2">Draft {i + 1}</div>
-                          <div className="text-sm line-clamp-3">{draft}</div>
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="pt-4 border-t border-white/10">
-                      <div className="text-xs uppercase tracking-wider text-white/50 mb-2">Edit Draft</div>
-                      <textarea
-                        value={currentDraft}
-                        onChange={(e) => setEditedContent(e.target.value)}
-                        className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-sm focus:border-white/30 focus:outline-none min-h-[150px] resize-none"
-                        placeholder="Edit your tweet here..."
-                      />
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="text-xs text-white/50">{currentDraft.length}/280</div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => navigator.clipboard.writeText(currentDraft)}
-                            className="px-3 py-1.5 border border-white/20 text-white rounded text-xs font-bold uppercase tracking-wider hover:bg-white/5 transition-all flex items-center gap-1"
-                          >
-                            <Copy className="w-3 h-3" />
-                            Copy
-                          </button>
-                          <button
-                            className="px-3 py-1.5 bg-white text-black rounded text-xs font-bold uppercase tracking-wider hover:bg-white/90 transition-all flex items-center gap-1"
-                          >
-                            <Send className="w-3 h-3" />
-                            Post
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-bold tracking-tight">Viral Score</h3>
-                      {analysis && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-3xl font-bold">{analysis.score}</span>
-                          <span className="text-xs text-white/50">/100</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {analysis && (
-                      <div className="space-y-4">
-                        <div className="h-3 w-full bg-white/10 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-white transition-all duration-500"
-                            style={{ width: `${analysis.score}%` }}
-                          />
-                        </div>
-
-                        {analysis.strengths.length > 0 && (
-                          <div>
-                            <div className="flex items-center gap-2 mb-2">
-                              <CheckCircle className="w-4 h-4 text-white" />
-                              <span className="text-xs uppercase tracking-wider text-white">Strengths</span>
-                            </div>
-                            <div className="space-y-1">
-                              {analysis.strengths.map((s: string, i: number) => (
-                                <div key={i} className="text-xs text-white/70 flex items-start gap-2">
-                                  <span className="text-white">•</span>
-                                  <span>{s}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {analysis.improvements.length > 0 && (
-                          <div>
-                            <div className="flex items-center gap-2 mb-2">
-                              <AlertCircle className="w-4 h-4 text-white/70" />
-                              <span className="text-xs uppercase tracking-wider text-white/70">Improvements</span>
-                            </div>
-                            <div className="space-y-1">
-                              {analysis.improvements.map((imp: string, i: number) => (
-                                <div key={i} className="text-xs text-white/70 flex items-start gap-2">
-                                  <span className="text-white/50">•</span>
-                                  <span>{imp}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
+          {/* Stats Grid - Compact */}
+          <div className="grid grid-cols-4 gap-3">
+            {metrics.map((metric, i) => (
+              <div key={i} className="bg-white/5 border border-white/10 rounded-lg p-3 hover:border-white/20 transition-all">
+                <div className="text-[10px] text-white/50 mb-1 uppercase tracking-wider">{metric.label}</div>
+                <div className="flex items-baseline gap-1.5 mb-0.5">
+                  <div className="text-2xl font-bold">{metric.value}</div>
+                  <div className="text-xs text-white/70 flex items-center gap-0.5">
+                    <TrendingUp className="w-2.5 h-2.5" />
+                    {metric.change}
                   </div>
                 </div>
-              )}
-            </div>
-          )}
-
-          {/* VIRAL HOOKS TAB */}
-          {activeTab === "hooks" && (
-            <div className="space-y-6">
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                <h2 className="text-2xl font-bold mb-2">500+ Viral Hooks Library</h2>
-                <p className="text-white/70 mb-6">Every hook tested on millions of tweets</p>
-                
-                {Object.entries(VIRAL_HOOKS).map(([category, hooks]) => (
-                  <div key={category} className="mb-8">
-                    <h3 className="text-lg font-bold mb-4 pb-2 border-b border-white/10">{category}</h3>
-                    <div className="space-y-2">
-                      {hooks.map((hook, i) => (
-                        <div key={i} className="p-4 bg-black border border-white/10 rounded-lg hover:border-white/20 transition-all">
-                          <p className="text-sm">{hook}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                <div className="text-[10px] text-white/40">from {metric.prev}</div>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
 
-          {/* THREAD UNFOLDER TAB */}
-          {activeTab === "threads" && (
-            <div className="space-y-6">
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                <h2 className="text-xl font-bold mb-4">Thread Unfolder</h2>
-                <p className="text-white/70 mb-6">Paste long content, get viral thread format</p>
-                
-                <textarea
-                  value={longContent}
-                  onChange={(e) => setLongContent(e.target.value)}
-                  placeholder="Paste your long-form content here..."
-                  className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-sm focus:border-white/30 focus:outline-none min-h-[200px] resize-none mb-4"
-                />
-                
-                <button
-                  onClick={handleUnfold}
-                  className="bg-white text-black px-6 py-3 rounded-lg font-bold hover:bg-white/90 transition-all"
-                >
-                  Unfold into Thread
+          {/* Main Content Grid - 3 Columns, NO EMPTY SPACE */}
+          <div className="grid grid-cols-12 gap-4">
+            
+            {/* Left Column: Viral Feed (5 cols) */}
+            <div className="col-span-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-bold flex items-center gap-2">
+                  <Flame className="w-4 h-4" />
+                  Viral Posts to Remix
+                </h2>
+                <button className="text-xs text-white/70 hover:text-white flex items-center gap-1">
+                  <RefreshCw className="w-3 h-3" />
+                  Refresh
                 </button>
               </div>
 
-              {unfoldedThread.length > 0 && (
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                  <h3 className="text-lg font-bold mb-4">Your Thread ({unfoldedThread.length} tweets)</h3>
-                  <div className="space-y-4">
-                    {unfoldedThread.map((tweet, i) => (
-                      <div key={i} className="p-4 bg-black border border-white/10 rounded-lg">
-                        <div className="text-xs text-white/50 mb-2">Tweet {i + 1}</div>
-                        <p className="text-sm whitespace-pre-wrap">{tweet}</p>
+              {VIRAL_FEED.map((post) => (
+                <div key={post.id} className="bg-white/5 border border-white/10 rounded-lg p-3 hover:border-white/20 transition-all">
+                  <div className="flex items-start gap-2 mb-2">
+                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                      {post.avatar}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <span className="font-bold text-xs truncate">{post.author}</span>
+                        <span className="text-white/50 text-[10px] truncate">{post.handle}</span>
+                        <span className="text-white/50 text-[10px]">• {post.time}</span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* GROWTH TACTICS TAB */}
-          {activeTab === "tactics" && (
-            <div className="space-y-6">
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                <h2 className="text-2xl font-bold mb-6">Growth Accelerators</h2>
-                
-                {Object.entries(GROWTH_ACCELERATORS).map(([key, tactic]: [string, any]) => (
-                  <div key={key} className="mb-6 p-6 bg-black border border-white/10 rounded-lg">
-                    <h3 className="text-lg font-bold mb-2">{tactic.name}</h3>
-                    <p className="text-white/70 mb-4">{tactic.description}</p>
-                    
-                    {tactic.expectedLift && (
-                      <div className="mb-2">
-                        <span className="text-sm font-bold">Expected Lift:</span>
-                        <span className="text-sm text-white/70 ml-2">{tactic.expectedLift}</span>
-                      </div>
-                    )}
-                    
-                    {tactic.implementation && Array.isArray(tactic.implementation) && (
-                      <div className="mt-4">
-                        <div className="text-sm font-bold mb-2">How to Implement:</div>
-                        <div className="space-y-1">
-                          {tactic.implementation.map((step: string, i: number) => (
-                            <div key={i} className="text-sm text-white/70">{step}</div>
-                          ))}
+                      <p className="text-xs leading-relaxed mb-2 line-clamp-3">{post.content}</p>
+                      
+                      <div className="flex items-center gap-3 text-[10px] text-white/50 mb-2">
+                        <div className="flex items-center gap-0.5">
+                          <Eye className="w-3 h-3" />
+                          {(post.impressions / 1000).toFixed(0)}K
+                        </div>
+                        <div className="flex items-center gap-0.5">
+                          <Heart className="w-3 h-3" />
+                          {post.likes.toLocaleString()}
+                        </div>
+                        <div className="flex items-center gap-0.5">
+                          <Repeat2 className="w-3 h-3" />
+                          {post.retweets}
+                        </div>
+                        <div className="flex items-center gap-0.5 ml-auto text-white font-bold">
+                          <Zap className="w-3 h-3" />
+                          {post.score}/100
                         </div>
                       </div>
-                    )}
+
+                      <div className="flex gap-1.5">
+                        <button className="flex-1 px-2 py-1 bg-white text-black rounded text-[10px] font-bold hover:bg-white/90">
+                          Remix
+                        </button>
+                        <button className="px-2 py-1 border border-white/20 rounded text-[10px] font-bold hover:bg-white/5">
+                          View
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Middle Column: Reply Opportunities (4 cols) */}
+            <div className="col-span-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-bold flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4" />
+                  Reply Opportunities
+                </h2>
+                <div className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
+                </div>
+              </div>
+
+              {REPLY_OPPORTUNITIES.map((opp) => (
+                <div key={opp.id} className="bg-white/5 border border-white/10 rounded-lg p-3 hover:border-white/20 transition-all">
+                  <div className="flex items-start gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                      {opp.avatar}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1 mb-0.5">
+                        <span className="font-bold text-[11px] truncate">{opp.author}</span>
+                        <span className="text-white/50 text-[10px]">• {opp.time}</span>
+                      </div>
+                      <p className="text-[11px] text-white/70 mb-1.5 line-clamp-2">{opp.content}</p>
+                      
+                      <div className="flex items-center gap-2 text-[10px] mb-2">
+                        <div className="flex items-center gap-0.5 text-white/50">
+                          <Eye className="w-2.5 h-2.5" />
+                          {(opp.impressions / 1000).toFixed(0)}K
+                        </div>
+                        <div className="flex items-center gap-0.5 text-white/50">
+                          <TrendingUp className="w-2.5 h-2.5" />
+                          {opp.velocity}/min
+                        </div>
+                        <div className="flex items-center gap-0.5 ml-auto text-white font-bold">
+                          <Zap className="w-2.5 h-2.5" />
+                          {opp.score}/100
+                        </div>
+                      </div>
+
+                      {expandedPost === opp.id && (
+                        <div className="bg-black/50 border border-white/10 rounded p-2 mb-2">
+                          <div className="text-[10px] text-white/50 mb-1">Suggested Reply:</div>
+                          <p className="text-[11px] leading-relaxed mb-1">{opp.suggestedReply}</p>
+                          <div className="text-[10px] text-white/40 italic">{opp.reasoning}</div>
+                        </div>
+                      )}
+
+                      <div className="flex gap-1">
+                        <button 
+                          onClick={() => setExpandedPost(expandedPost === opp.id ? null : opp.id)}
+                          className="flex-1 px-2 py-1 bg-white text-black rounded text-[10px] font-bold hover:bg-white/90 flex items-center justify-center gap-0.5"
+                        >
+                          {expandedPost === opp.id ? <ChevronUp className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}
+                          {expandedPost === opp.id ? 'Hide' : 'View Reply'}
+                        </button>
+                        <button className="px-2 py-1 border border-white/20 rounded text-[10px] font-bold hover:bg-white/5">
+                          Post
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Right Column: Top Posts, Schedule, Tools (3 cols) */}
+            <div className="col-span-3 space-y-3">
+              
+              {/* Top Posts */}
+              <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                <h3 className="text-xs font-bold mb-2 flex items-center gap-1">
+                  <Flame className="w-3.5 h-3.5" />
+                  Your Top Posts
+                </h3>
+                {TOP_POSTS.map((post, i) => (
+                  <div key={i} className="mb-2 pb-2 border-b border-white/10 last:border-0">
+                    <p className="text-[11px] mb-1 line-clamp-1 font-medium">{post.content}</p>
+                    <div className="flex items-center gap-2 text-[10px] text-white/50">
+                      <span>{post.impressions} views</span>
+                      <span>•</span>
+                      <span>{post.engagement}</span>
+                      <span className="ml-auto">{post.date}</span>
+                    </div>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
 
-          {/* REPLY FINDER - Link to separate page */}
-          {activeTab === "replies" && (
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-12 text-center">
-              <MessageCircle className="w-16 h-16 mx-auto mb-4 text-white/50" />
-              <h2 className="text-2xl font-bold mb-2">Reply Finder</h2>
-              <p className="text-white/70 mb-6">Find high-impact reply opportunities</p>
-              <a
-                href="/replies"
-                className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-lg font-bold hover:bg-white/90 transition-all"
-              >
-                Open Reply Finder
-                <ArrowRight className="w-5 h-5" />
-              </a>
+              {/* Scheduled */}
+              <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                <h3 className="text-xs font-bold mb-2 flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  Scheduled ({SCHEDULED_POSTS.length})
+                </h3>
+                {SCHEDULED_POSTS.map((post, i) => (
+                  <div key={i} className="mb-2 pb-2 border-b border-white/10 last:border-0">
+                    <p className="text-[11px] mb-1 line-clamp-2">{post.content}</p>
+                    <div className="text-[10px] text-white/50 flex items-center gap-1">
+                      <Clock className="w-2.5 h-2.5" />
+                      {post.time}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Quick Tools */}
+              <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                <h3 className="text-xs font-bold mb-2">Quick Tools</h3>
+                <div className="space-y-1.5">
+                  <a href="/settings" className="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded text-[11px] hover:bg-white/10">
+                    <BookOpen className="w-3.5 h-3.5" />
+                    500+ Viral Hooks
+                  </a>
+                  <button className="w-full flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded text-[11px] hover:bg-white/10">
+                    <Layers className="w-3.5 h-3.5" />
+                    Thread Unfolder
+                  </button>
+                  <button className="w-full flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded text-[11px] hover:bg-white/10">
+                    <Wrench className="w-3.5 h-3.5" />
+                    Growth Tactics
+                  </button>
+                  <button className="w-full flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded text-[11px] hover:bg-white/10">
+                    <Target className="w-3.5 h-3.5" />
+                    Voice Clone
+                  </button>
+                </div>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </main>
+
+      {/* Quick Create Modal */}
+      {showQuickCreate && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-black border border-white/20 rounded-xl p-4 max-w-2xl w-full">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-bold">Quick Create</h3>
+              <button onClick={() => setShowQuickCreate(false)} className="text-white/70 hover:text-white">
+                <XLogo className="w-4 h-4" />
+              </button>
+            </div>
+            <input
+              type="text"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="What do you want to talk about?"
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mb-3 focus:border-white/30 focus:outline-none"
+            />
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              className="w-full bg-white text-black px-4 py-2 rounded-lg text-sm font-bold hover:bg-white/90 disabled:opacity-50"
+            >
+              {isGenerating ? 'Generating...' : 'Generate Content'}
+            </button>
+
+            {generatedDrafts.length > 0 && (
+              <div className="mt-4 space-y-2">
+                {generatedDrafts.map((draft, i) => (
+                  <div key={i} className="bg-white/5 border border-white/10 rounded-lg p-3">
+                    <p className="text-sm mb-2">{draft}</p>
+                    <button className="px-3 py-1 bg-white text-black rounded text-xs font-bold hover:bg-white/90">
+                      Use This
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

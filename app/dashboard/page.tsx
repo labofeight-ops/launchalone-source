@@ -310,8 +310,8 @@ export default function DashboardPage() {
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm font-medium ${activeTab === item.id
-                        ? 'bg-white text-black'
-                        : 'text-white/70 hover:bg-white/5 hover:text-white'
+                      ? 'bg-white text-black'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                       }`}
                   >
                     <item.icon className={`w-4 h-4 ${activeTab === item.id ? 'text-black' : 'text-white/70'}`} />
@@ -733,16 +733,138 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* FALLBACK FOR UNSUPPORTED TOOLS */}
-          {["tactics", "analytics"].includes(activeTab) && (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center mb-6 border border-white/10">
-                <Wrench className="w-10 h-10 text-white/20" />
+          {/* GROWTH TACTICS VIEW */}
+          {activeTab === "tactics" && (
+            <div className="max-w-4xl mx-auto space-y-6">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
+                <h2 className="text-2xl font-bold mb-2">Growth Accelerators</h2>
+                <p className="text-white/60">High-impact strategies to accelerate your follower growth.</p>
               </div>
-              <h2 className="text-2xl font-bold mb-2">Coming Soon</h2>
-              <p className="text-white/50 max-w-md mx-auto">
-                The <span className="text-white font-bold">{NAVIGATION_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label}</span> tool is currently in development for the Pro Beta.
-              </p>
+
+              <div className="grid gap-6">
+                {Object.values(GROWTH_ACCELERATORS).map((tactic: any, i) => (
+                  <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-6 hover:border-white/20 transition-all">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-lg font-bold">{tactic.name}</h3>
+                          <span className="text-[10px] bg-green-500/10 text-green-400 px-2 py-0.5 rounded font-bold uppercase tracking-wide"> Proven </span>
+                        </div>
+                        <p className="text-sm text-white/70">{tactic.description}</p>
+                      </div>
+                      <div className="text-right text-xs text-white/40">
+                        <div className="mb-1">Lift: <span className="text-green-400 font-bold">{tactic.expectedLift || "High"}</span></div>
+                        <div>Time: <span className="text-white font-bold">{tactic.timeCommitment || "Varies"}</span></div>
+                      </div>
+                    </div>
+
+                    <div className="bg-black/40 rounded-lg p-4 border border-white/5">
+                      <h4 className="text-xs font-bold uppercase text-white/40 mb-3">Implementation</h4>
+                      {Array.isArray(tactic.implementation) ? (
+                        <ul className="space-y-2">
+                          {tactic.implementation.map((step: string, j: number) => (
+                            <li key={j} className="text-sm flex items-start gap-2">
+                              <span className="text-white/20 mt-1">●</span>
+                              <span className="text-white/90">{step}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-white/90 whitespace-pre-wrap">{tactic.tactic || tactic.reasoning || tactic.implementation}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ANALYTICS VIEW */}
+          {activeTab === "analytics" && (
+            <div className="max-w-5xl mx-auto space-y-6">
+              <div className="grid grid-cols-4 gap-4">
+                {metrics.map((metric, i) => (
+                  <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-6 hover:border-white/20 transition-all">
+                    <div className="text-sm text-white/50 mb-2 font-medium uppercase tracking-wider">{metric.label}</div>
+                    <div className="flex items-end justify-between">
+                      <div className="text-4xl font-bold">{metric.value}</div>
+                      <div className="text-sm text-green-400 bg-green-400/10 px-2 py-1 rounded flex items-center gap-1">
+                        <TrendingUp className="w-3 h-3" />
+                        {metric.change}
+                      </div>
+                    </div>
+                    <div className="mt-4 text-xs text-white/40">
+                      Previous: <span className="text-white/60">{metric.prev}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-xl p-6">
+                  <h3 className="font-bold mb-6 flex items-center gap-2">
+                    <Activity className="w-5 h-5" /> Engagement Trends
+                  </h3>
+                  {/* Simulated Chart Container */}
+                  <div className="h-64 flex items-end justify-between gap-2 px-2">
+                    {[35, 45, 30, 60, 75, 50, 65, 80, 70, 90, 85, 100].map((h, i) => (
+                      <div key={i} className="w-full bg-white/10 rounded-t-sm hover:bg-white/20 transition-all relative group" style={{ height: `${h}%` }}>
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-black text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                          {h * 1240}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between mt-4 text-xs text-white/40 border-t border-white/5 pt-2">
+                    <span>Feb 1</span>
+                    <span>Feb 14</span>
+                    <span>Feb 28</span>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-1 space-y-6">
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                    <h3 className="font-bold mb-4 flex items-center gap-2">
+                      <Target className="w-4 h-4" /> Audience Quality
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-white/60">Founders</span>
+                          <span className="font-bold">42%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-white transition-all" style={{ width: '42%' }} />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-white/60">Investors</span>
+                          <span className="font-bold">18%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-white/70 transition-all" style={{ width: '18%' }} />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-white/60">Developers</span>
+                          <span className="font-bold">25%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-white/40 transition-all" style={{ width: '25%' }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                    <h3 className="font-bold mb-1">Profile Health</h3>
+                    <div className="text-3xl font-bold text-green-400 mb-1">94/100</div>
+                    <p className="text-xs text-white/50">Top 5% of creators in your niche.</p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 

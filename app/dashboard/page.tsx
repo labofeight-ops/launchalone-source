@@ -285,8 +285,8 @@ export default function DashboardPage() {
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm font-medium ${activeTab === item.id
-                        ? 'bg-white text-black'
-                        : 'text-white/70 hover:bg-white/5 hover:text-white'
+                      ? 'bg-white text-black'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                       }`}
                   >
                     <item.icon className={`w-4 h-4 ${activeTab === item.id ? 'text-black' : 'text-white/70'}`} />
@@ -440,75 +440,75 @@ export default function DashboardPage() {
 
               <div className="space-y-4">
                 {VIRAL_FEED.map((post) => (
-                  <divKey = {post.id} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-white/20 transition-all">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/70 font-medium uppercase">{post.category}</span>
-                  <span className="ml-auto text-xs font-bold flex items-center gap-1 text-white"><Zap className="w-3 h-3 fill-white" /> {post.score}</span>
-                </div>
-                <p className="text-sm leading-relaxed mb-3 font-medium">"{post.content}"</p>
-                <div className="flex items-center justify-between text-xs text-white/40 border-t border-white/5 pt-3 mt-3">
-                  <span>{(post.impressions / 1000).toFixed(0)}k views</span>
-                  <button className="text-white hover:underline font-bold">Remix This</button>
-                </div>
+                  <div key={post.id} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-white/20 transition-all">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/70 font-medium uppercase">{post.category}</span>
+                      <span className="ml-auto text-xs font-bold flex items-center gap-1 text-white"><Zap className="w-3 h-3 fill-white" /> {post.score}</span>
+                    </div>
+                    <p className="text-sm leading-relaxed mb-3 font-medium">"{post.content}"</p>
+                    <div className="flex items-center justify-between text-xs text-white/40 border-t border-white/5 pt-3 mt-3">
+                      <span>{(post.impressions / 1000).toFixed(0)}k views</span>
+                      <button className="text-white hover:underline font-bold">Remix This</button>
+                    </div>
+                  </div>
+                ))}
               </div>
+            </div>
+
+            {/* Right Column: Scheduled & Top Posts (Quick Tools removed) */}
+            <div className="lg:col-span-1 space-y-6">
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-5">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" /> Scheduled Queue
+                </h3>
+                <div className="space-y-4">
+                  {SCHEDULED_POSTS.map((post, i) => (
+                    <div key={i} className="relative pl-4 border-l-2 border-white/10 last:pb-0">
+                      <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-white ring-4 ring-black" />
+                      <div className="text-xs text-white/50 mb-1">{post.time}</div>
+                      <p className="text-xs line-clamp-1 text-white/80">{post.content}</p>
+                    </div>
                   ))}
-            </div>
-          </div>
-
-          {/* Right Column: Scheduled & Top Posts (Quick Tools removed) */}
-          <div className="lg:col-span-1 space-y-6">
-
-            <div className="bg-white/5 border border-white/10 rounded-xl p-5">
-              <h3 className="font-bold mb-4 flex items-center gap-2">
-                <Calendar className="w-4 h-4" /> Scheduled Queue
-              </h3>
-              <div className="space-y-4">
-                {SCHEDULED_POSTS.map((post, i) => (
-                  <div key={i} className="relative pl-4 border-l-2 border-white/10 last:pb-0">
-                    <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-white ring-4 ring-black" />
-                    <div className="text-xs text-white/50 mb-1">{post.time}</div>
-                    <p className="text-xs line-clamp-1 text-white/80">{post.content}</p>
-                  </div>
-                ))}
+                </div>
+                <button className="w-full mt-4 py-2 border border-white/10 rounded-lg text-xs font-bold hover:bg-white/5 transition-colors">View All Scheduled</button>
               </div>
-              <button className="w-full mt-4 py-2 border border-white/10 rounded-lg text-xs font-bold hover:bg-white/5 transition-colors">View All Scheduled</button>
-            </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-xl p-5">
-              <h3 className="font-bold mb-4 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" /> Top Performers
-              </h3>
-              <div className="space-y-3">
-                {TOP_POSTS.map((post, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs group cursor-pointer">
-                    <p className="flex-1 truncate text-white/70 group-hover:text-white transition-colors mr-2">{post.content}</p>
-                    <span className="font-bold">{post.impressions}</span>
-                  </div>
-                ))}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-5">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" /> Top Performers
+                </h3>
+                <div className="space-y-3">
+                  {TOP_POSTS.map((post, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs group cursor-pointer">
+                      <p className="flex-1 truncate text-white/70 group-hover:text-white transition-colors mr-2">{post.content}</p>
+                      <span className="font-bold">{post.impressions}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
 
+          </div>
         </div>
-    </div>
       </main >
 
-    {/* Keep Quick Create Modal */ }
-  {
-    showQuickCreate && (
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-black border border-white/20 rounded-xl p-6 max-w-xl w-full">
-          {/* ... (Existing modal content) ... */}
-          <h3 className="text-xl font-bold mb-4">Create Post</h3>
-          <button onClick={() => setShowQuickCreate(false)} className="absolute top-4 right-4 text-white/50 hover:text-white">Close</button>
-          {/* Simplified for brevity in this update, assuming existing logic remains or user can close */}
-          <div className="text-center p-12 custom-dashed-border">
-            <p>Generating...</p>
+      {/* Keep Quick Create Modal */}
+      {
+        showQuickCreate && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-black border border-white/20 rounded-xl p-6 max-w-xl w-full">
+              {/* ... (Existing modal content) ... */}
+              <h3 className="text-xl font-bold mb-4">Create Post</h3>
+              <button onClick={() => setShowQuickCreate(false)} className="absolute top-4 right-4 text-white/50 hover:text-white">Close</button>
+              {/* Simplified for brevity in this update, assuming existing logic remains or user can close */}
+              <div className="text-center p-12 custom-dashed-border">
+                <p>Generating...</p>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    )
-  }
+        )
+      }
     </div >
   )
 }

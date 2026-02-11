@@ -1,16 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   BarChart3, Zap, TrendingUp, MessageCircle, Calendar, Sparkles, Target,
   LogOut, MoreHorizontal, ArrowRight, Activity, Shield, Eye, Flame,
   Clock, Copy, Send, User, Settings, RefreshCw, CheckCircle, AlertCircle,
   Edit, Users, Heart, Repeat2, Search, Filter, ChevronDown, ChevronUp,
   ExternalLink, BookOpen, Layers, Wrench, Plus, TrendingDown,
-  LayoutDashboard, FileText, Bot
+  LayoutDashboard, FileText
 } from "lucide-react"
-import { analyzeTweetVirality, generateTweetWithContext, VIRAL_HOOKS } from "@/lib/viral-engine"
-import { scoreReplyOpportunity, generateStrategicReply, unfoldThread, GROWTH_ACCELERATORS } from "@/lib/growth-engine"
 
 // 2026 X Logo
 const XLogo = ({ className = "w-5 h-5" }) => (
@@ -191,7 +189,7 @@ const SCHEDULED_POSTS = [
   { content: "Here's what 90 days of consistent replies taught me", time: "Tomorrow, 5:00 PM", status: "scheduled" },
 ]
 
-// Navigation Structure - CLEANED UP
+// Navigation Structure
 const NAVIGATION_GROUPS = [
   {
     title: "Overview",
@@ -211,33 +209,29 @@ const NAVIGATION_GROUPS = [
     title: "Content Lab",
     items: [
       { id: "studio", label: "Studio", icon: FileText, href: "#" },
-      { id: "hooks", label: "Viral Hooks", icon: BookOpen, href: "#", badge: "500+" }, // Moved from Quick Tools
-      { id: "unfolder", label: "Thread Unfolder", icon: Layers, href: "#" }, // Moved from Quick Tools
-      { id: "clone", label: "Voice Clone", icon: Users, href: "#" }, // Moved from Quick Tools
+      { id: "hooks", label: "Viral Hooks", icon: BookOpen, href: "#", badge: "500+" },
+      { id: "unfolder", label: "Thread Unfolder", icon: Layers, href: "#" },
+      { id: "clone", label: "Voice Clone", icon: Users, href: "#" },
     ]
   },
   {
     title: "Strategy",
     items: [
-      { id: "tactics", label: "Growth Tactics", icon: Wrench, href: "#" }, // Moved from Quick Tools
+      { id: "tactics", label: "Growth Tactics", icon: Wrench, href: "#" },
       { id: "analytics", label: "Analytics", icon: BarChart3, href: "#" },
     ]
   }
 ]
 
-
 export default function DashboardPage() {
   const [timeRange, setTimeRange] = useState<TimeRange>("30D")
   const [aiCredits, setAiCredits] = useState({ used: 23, total: 100, resetIn: "11h 23m" })
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [expandedPost, setExpandedPost] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState("dashboard")
   const [showQuickCreate, setShowQuickCreate] = useState(false)
   const [topic, setTopic] = useState("")
-  const [generatedDrafts, setGeneratedDrafts] = useState<string[]>([])
-  const [selectedDraft, setSelectedDraft] = useState(0)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [analysis, setAnalysis] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState("dashboard")
+  const [generatedDrafts, setGeneratedDrafts] = useState<string[]>([])
 
   const metrics = METRICS[timeRange]
   const creditPercentage = (aiCredits.used / aiCredits.total) * 100
@@ -246,23 +240,16 @@ export default function DashboardPage() {
     if (aiCredits.used >= aiCredits.total) return
     setIsGenerating(true)
     await new Promise(resolve => setTimeout(resolve, 1000))
-
-    const drafts = [
-      `${topic || "Your topic"}\n\nHere's what I learned:\n\n• Point 1\n• Point 2\n• Point 3\n\nWhat would you add?`,
-      `Everyone says ${topic || "this"}. Wrong.\n\nWhat actually works:\n\n[Insight]\n\nAgree?`,
-      `Spent 2 years on ${topic || "this"}.\n\nSimple framework:\n\n1. Step 1\n2. Step 2\n3. Step 3`
-    ]
-
-    setGeneratedDrafts(drafts)
-    setSelectedDraft(0)
-    setAnalysis(analyzeTweetVirality(drafts[0]))
+    setGeneratedDrafts([
+      `${topic || "Your topic"}\n\nHere's what I learned:\n\n• Point 1\n• Point 2\n• Point 3`,
+    ])
     setAiCredits(prev => ({ ...prev, used: prev.used + 1 }))
     setIsGenerating(false)
   }
 
   return (
     <div className="min-h-screen bg-black text-white font-sans">
-      {/* Sidebar - REORGANIZED */}
+      {/* Sidebar */}
       <aside className={`fixed top-0 left-0 h-screen bg-black border-r border-white/10 transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-20'} z-50 flex flex-col`}>
         <div className="p-4 border-b border-white/10 flex items-center gap-3">
           <div className="min-w-8 min-h-8 bg-white text-black rounded-lg flex items-center justify-center">
@@ -285,8 +272,8 @@ export default function DashboardPage() {
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm font-medium ${activeTab === item.id
-                      ? 'bg-white text-black'
-                      : 'text-white/70 hover:bg-white/5 hover:text-white'
+                        ? 'bg-white text-black'
+                        : 'text-white/70 hover:bg-white/5 hover:text-white'
                       }`}
                   >
                     <item.icon className={`w-4 h-4 ${activeTab === item.id ? 'text-black' : 'text-white/70'}`} />
@@ -336,7 +323,7 @@ export default function DashboardPage() {
         </div>
       </aside>
 
-      {/* Main Dashboard - ADJUSTED LAYOUT FOR SIDEBAR */}
+      {/* Main Content */}
       <main className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
 
         {/* Header */}
@@ -371,144 +358,242 @@ export default function DashboardPage() {
 
         <div className="p-6 space-y-6">
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-4 gap-4">
-            {metrics.map((metric, i) => (
-              <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-white/20 transition-all group">
-                <div className="text-xs text-white/50 mb-1 font-medium uppercase tracking-wider">{metric.label}</div>
-                <div className="flex items-end justify-between">
-                  <div className="text-3xl font-bold group-hover:scale-105 transition-transform origin-left">{metric.value}</div>
-                  <div className="text-xs text-green-400 bg-green-400/10 px-1.5 py-0.5 rounded flex items-center gap-1">
-                    <TrendingUp className="w-3 h-3" />
-                    {metric.change}
+          {/* Stats Grid - Show on Dashboard & Analytics */}
+          {["dashboard", "analytics"].includes(activeTab) && (
+            <div className="grid grid-cols-4 gap-4">
+              {metrics.map((metric, i) => (
+                <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-white/20 transition-all group">
+                  <div className="text-xs text-white/50 mb-1 font-medium uppercase tracking-wider">{metric.label}</div>
+                  <div className="flex items-end justify-between">
+                    <div className="text-3xl font-bold group-hover:scale-105 transition-transform origin-left">{metric.value}</div>
+                    <div className="text-xs text-green-400 bg-green-400/10 px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3" />
+                      {metric.change}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-            {/* Left Column: Reply Opportunities (Previously Middle) */}
-            <div className="lg:col-span-1 space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold flex items-center gap-2">
-                  <MessageCircle className="w-5 h-5" />
-                  Reply Finder
-                </h2>
-                <span className="text-xs text-white/50 bg-white/5 px-2 py-1 rounded-full">Live Feed</span>
-              </div>
-
-              <div className="space-y-4">
-                {REPLY_OPPORTUNITIES.map((opp) => (
-                  <div key={opp.id} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-white/20 transition-all cursor-pointer group">
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs">{opp.avatar}</div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-sm truncate">{opp.author}</span>
-                          <span className="text-xs text-white/40">{opp.time}</span>
-                        </div>
-                        <p className="text-xs text-white/70 line-clamp-2 mt-1">{opp.content}</p>
-                      </div>
-                    </div>
-
-                    <div className="pl-11">
-                      <div className="bg-black/40 rounded p-2 mb-3 border border-white/5">
-                        <div className="text-[10px] text-white/40 uppercase font-bold mb-1">Suggested Reply</div>
-                        <p className="text-xs leading-relaxed text-white/90">{opp.suggestedReply}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button className="flex-1 py-1.5 bg-white text-black rounded font-bold text-xs hover:bg-white/90">Post Reply</button>
-                        <button className="px-3 py-1.5 border border-white/20 rounded font-bold text-xs hover:bg-white/5">Skip</button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
+          )}
 
-            {/* Middle Column: Viral Feed (Previously Left) */}
-            <div className="lg:col-span-1 space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold flex items-center gap-2">
-                  <Flame className="w-5 h-5" />
-                  Viral Inspiration
-                </h2>
-                <button className="text-xs hover:text-white text-white/50 flex items-center gap-1"><RefreshCw className="w-3 h-3" /> Refresh</button>
-              </div>
-
-              <div className="space-y-4">
-                {VIRAL_FEED.map((post) => (
-                  <div key={post.id} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-white/20 transition-all">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/70 font-medium uppercase">{post.category}</span>
-                      <span className="ml-auto text-xs font-bold flex items-center gap-1 text-white"><Zap className="w-3 h-3 fill-white" /> {post.score}</span>
-                    </div>
-                    <p className="text-sm leading-relaxed mb-3 font-medium">"{post.content}"</p>
-                    <div className="flex items-center justify-between text-xs text-white/40 border-t border-white/5 pt-3 mt-3">
-                      <span>{(post.impressions / 1000).toFixed(0)}k views</span>
-                      <button className="text-white hover:underline font-bold">Remix This</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right Column: Scheduled & Top Posts (Quick Tools removed) */}
-            <div className="lg:col-span-1 space-y-6">
-
-              <div className="bg-white/5 border border-white/10 rounded-xl p-5">
-                <h3 className="font-bold mb-4 flex items-center gap-2">
-                  <Calendar className="w-4 h-4" /> Scheduled Queue
-                </h3>
+          {/* DASHBOARD VIEW */}
+          {activeTab === "dashboard" && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Reply Opportunities */}
+              <div className="lg:col-span-1 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold flex items-center gap-2">
+                    <MessageCircle className="w-5 h-5" />
+                    Reply Finder
+                  </h2>
+                  <button onClick={() => setActiveTab("replies")} className="text-xs text-white/50 hover:text-white">View All</button>
+                </div>
                 <div className="space-y-4">
-                  {SCHEDULED_POSTS.map((post, i) => (
-                    <div key={i} className="relative pl-4 border-l-2 border-white/10 last:pb-0">
-                      <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-white ring-4 ring-black" />
-                      <div className="text-xs text-white/50 mb-1">{post.time}</div>
-                      <p className="text-xs line-clamp-1 text-white/80">{post.content}</p>
-                    </div>
+                  {REPLY_OPPORTUNITIES.slice(0, 2).map((opp) => (
+                    <ReplyCard key={opp.id} opp={opp} />
                   ))}
                 </div>
-                <button className="w-full mt-4 py-2 border border-white/10 rounded-lg text-xs font-bold hover:bg-white/5 transition-colors">View All Scheduled</button>
               </div>
 
-              <div className="bg-white/5 border border-white/10 rounded-xl p-5">
-                <h3 className="font-bold mb-4 flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" /> Top Performers
-                </h3>
-                <div className="space-y-3">
-                  {TOP_POSTS.map((post, i) => (
-                    <div key={i} className="flex items-center justify-between text-xs group cursor-pointer">
-                      <p className="flex-1 truncate text-white/70 group-hover:text-white transition-colors mr-2">{post.content}</p>
-                      <span className="font-bold">{post.impressions}</span>
-                    </div>
+              {/* Viral Feed */}
+              <div className="lg:col-span-1 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold flex items-center gap-2">
+                    <Flame className="w-5 h-5" />
+                    Viral Inspiration
+                  </h2>
+                  <button onClick={() => setActiveTab("viral")} className="text-xs text-white/50 hover:text-white">View All</button>
+                </div>
+                <div className="space-y-4">
+                  {VIRAL_FEED.slice(0, 2).map((post) => (
+                    <ViralPostCard key={post.id} post={post} />
                   ))}
+                </div>
+              </div>
+
+              {/* Right Column */}
+              <div className="lg:col-span-1 space-y-6">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-5">
+                  <h3 className="font-bold mb-4 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" /> Scheduled
+                  </h3>
+                  <div className="space-y-4">
+                    {SCHEDULED_POSTS.map((post, i) => (
+                      <div key={i} className="relative pl-4 border-l-2 border-white/10 last:pb-0">
+                        <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-white ring-4 ring-black" />
+                        <div className="text-xs text-white/50 mb-1">{post.time}</div>
+                        <p className="text-xs line-clamp-1 text-white/80">{post.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-xl p-5">
+                  <h3 className="font-bold mb-4 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4" /> Top Performers
+                  </h3>
+                  <div className="space-y-3">
+                    {TOP_POSTS.map((post, i) => (
+                      <div key={i} className="flex items-center justify-between text-xs group cursor-pointer">
+                        <p className="flex-1 truncate text-white/70 group-hover:text-white transition-colors mr-2">{post.content}</p>
+                        <span className="font-bold">{post.impressions}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
+          )}
 
+          {/* REPLIES VIEW */}
+          {activeTab === "replies" && (
+            <div className="max-w-4xl mx-auto space-y-6">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
+                <h2 className="text-2xl font-bold mb-2">Reply Opportunities</h2>
+                <p className="text-white/60">High-signal tweets where your reply can generate maximum engagement.</p>
+              </div>
+              {REPLY_OPPORTUNITIES.map((opp) => (
+                <ReplyCard key={opp.id} opp={opp} expanded />
+              ))}
+            </div>
+          )}
+
+          {/* VIRAL FEED VIEW */}
+          {activeTab === "viral" && (
+            <div className="max-w-4xl mx-auto space-y-6">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
+                <h2 className="text-2xl font-bold mb-2">Viral Inspiration</h2>
+                <p className="text-white/60">Curated high-performing posts to study and remix.</p>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                {VIRAL_FEED.map((post) => (
+                  <ViralPostCard key={post.id} post={post} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* SCHEDULE VIEW */}
+          {activeTab === "schedule" && (
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
+                <h2 className="text-2xl font-bold mb-2">Content Calendar</h2>
+                <p className="text-white/60">Manage your upcoming posts and threads.</p>
+              </div>
+              <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                {SCHEDULED_POSTS.map((post, i) => (
+                  <div key={i} className="p-4 border-b border-white/10 last:border-0 flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-bold text-white mb-1">{post.content}</div>
+                      <div className="flex items-center gap-2 text-xs text-white/50">
+                        <Calendar className="w-3 h-3" /> {post.time}
+                        <span className="bg-yellow-500/10 text-yellow-500 px-1.5 rounded">Scheduled</span>
+                      </div>
+                    </div>
+                    <button className="p-2 hover:bg-white/10 rounded"><MoreHorizontal className="w-4 h-4" /></button>
+                  </div>
+                ))}
+                <div className="p-4 text-center">
+                  <button className="text-sm font-bold text-white/50 hover:text-white flex items-center justify-center gap-2">
+                    <Plus className="w-4 h-4" /> Schedule New
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PLACEHOLDER FOR OTHER TOOLS */}
+          {["studio", "hooks", "unfolder", "clone", "tactics", "analytics"].includes(activeTab) && (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center mb-6 border border-white/10">
+                <Wrench className="w-10 h-10 text-white/20" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Coming Soon</h2>
+              <p className="text-white/50 max-w-md mx-auto">
+                The <span className="text-white font-bold">{NAVIGATION_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label}</span> tool is currently in development for the Pro Beta.
+              </p>
+            </div>
+          )}
+
+        </div>
+      </main>
+
+      {/* Quick Create Modal */}
+      {showQuickCreate && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-black border border-white/20 rounded-xl p-6 max-w-xl w-full">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold">Create Post</h3>
+              <button onClick={() => setShowQuickCreate(false)} className="text-white/50 hover:text-white">
+                <XLogo className="w-4 h-4" />
+              </button>
+            </div>
+            <input
+              type="text"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="What do you want to talk about?"
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mb-3 focus:border-white/30 focus:outline-none"
+            />
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              className="w-full bg-white text-black px-4 py-2 rounded-lg text-sm font-bold hover:bg-white/90 disabled:opacity-50"
+            >
+              {isGenerating ? 'Generating...' : 'Generate Content'}
+            </button>
+
+            {generatedDrafts.length > 0 && (
+              <div className="mt-4 p-4 bg-white/5 rounded-lg text-sm border border-white/10 whitespace-pre-wrap">
+                {generatedDrafts[0]}
+              </div>
+            )}
           </div>
         </div>
-      </main >
+      )}
+    </div>
+  )
+}
 
-      {/* Keep Quick Create Modal */}
-      {
-        showQuickCreate && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-black border border-white/20 rounded-xl p-6 max-w-xl w-full">
-              {/* ... (Existing modal content) ... */}
-              <h3 className="text-xl font-bold mb-4">Create Post</h3>
-              <button onClick={() => setShowQuickCreate(false)} className="absolute top-4 right-4 text-white/50 hover:text-white">Close</button>
-              {/* Simplified for brevity in this update, assuming existing logic remains or user can close */}
-              <div className="text-center p-12 custom-dashed-border">
-                <p>Generating...</p>
-              </div>
-            </div>
+function ReplyCard({ opp, expanded }: { opp: any, expanded?: boolean }) {
+  return (
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-white/20 transition-all cursor-pointer group">
+      <div className="flex items-start gap-3 mb-3">
+        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs">{opp.avatar}</div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-sm truncate">{opp.author}</span>
+            <span className="text-xs text-white/40">{opp.time}</span>
           </div>
-        )
-      }
-    </div >
+          <p className={`text-xs text-white/70 mt-1 ${expanded ? '' : 'line-clamp-2'}`}>{opp.content}</p>
+        </div>
+      </div>
+
+      <div className="pl-11">
+        <div className="bg-black/40 rounded p-2 mb-3 border border-white/5">
+          <div className="text-[10px] text-white/40 uppercase font-bold mb-1">Suggested Reply</div>
+          <p className="text-xs leading-relaxed text-white/90">{opp.suggestedReply}</p>
+        </div>
+        <div className="flex gap-2">
+          <button className="flex-1 py-1.5 bg-white text-black rounded font-bold text-xs hover:bg-white/90">Post Reply</button>
+          <button className="px-3 py-1.5 border border-white/20 rounded font-bold text-xs hover:bg-white/5">Skip</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ViralPostCard({ post }: { post: any }) {
+  return (
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-white/20 transition-all">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/70 font-medium uppercase">{post.category}</span>
+        <span className="ml-auto text-xs font-bold flex items-center gap-1 text-white"><Zap className="w-3 h-3 fill-white" /> {post.score}</span>
+      </div>
+      <p className="text-sm leading-relaxed mb-3 font-medium">"{post.content}"</p>
+      <div className="flex items-center justify-between text-xs text-white/40 border-t border-white/5 pt-3 mt-3">
+        <span>{(post.impressions / 1000).toFixed(0)}k views</span>
+        <button className="text-white hover:underline font-bold">Remix This</button>
+      </div>
+    </div>
   )
 }
